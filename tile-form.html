@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ออกแบบกระเบื้อง — TileAI</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --cream:#f5f0e8;
+  --stone:#2c2825;
+  --terracotta:#c4623a;
+  --gold:#d4a853;
+  --sand:#e8d5b0;
+  --warm-gray:#8c7f74;
+}
+
+body{
+  font-family:'DM Sans',sans-serif;
+  background:var(--cream);
+  min-height:100vh;
+  color:var(--stone);
+}
+
+/* NAV */
+nav{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:20px 50px;
+  background:var(--stone);
+  position:sticky;top:0;z-index:100;
+}
+.logo{
+  font-family:'Playfair Display',serif;
+  font-size:22px;color:var(--cream);letter-spacing:1px;
+}
+.nav-links{display:flex;gap:30px;align-items:center;}
+.nav-links a{
+  color:var(--sand);font-size:13px;text-decoration:none;
+  letter-spacing:.5px;transition:.2s;
+}
+.nav-links a:hover{color:var(--gold);}
+.nav-user{
+  color:var(--warm-gray);font-size:12px;
+}
+
+/* HERO STRIP */
+.hero-strip{
+  background:var(--terracotta);
+  padding:60px 50px 50px;
+  position:relative;overflow:hidden;
+}
+.hero-strip::before{
+  content:'';position:absolute;top:-40px;right:-40px;
+  width:300px;height:300px;
+  border-radius:50%;
+  background:rgba(255,255,255,.06);
+}
+.step-tag{
+  display:inline-block;
+  background:rgba(255,255,255,.2);
+  color:white;font-size:11px;letter-spacing:2px;
+  padding:5px 14px;border-radius:20px;margin-bottom:16px;
+  text-transform:uppercase;
+}
+.hero-strip h1{
+  font-family:'Playfair Display',serif;
+  font-size:40px;color:white;line-height:1.2;
+  max-width:500px;
+}
+.hero-strip p{
+  color:rgba(255,255,255,.75);margin-top:12px;font-size:15px;
+}
+
+/* PROGRESS */
+.progress-bar{
+  display:flex;padding:0 50px;background:var(--stone);
+}
+.prog-step{
+  flex:1;padding:14px 0;text-align:center;
+  font-size:11px;letter-spacing:1px;color:var(--warm-gray);
+  text-transform:uppercase;position:relative;
+  transition:.3s;
+}
+.prog-step.active{color:var(--gold);}
+.prog-step.active::after{
+  content:'';position:absolute;bottom:0;left:0;right:0;
+  height:2px;background:var(--gold);
+}
+.prog-step.done{color:var(--sand);}
+
+/* MAIN LAYOUT */
+.main{
+  display:grid;grid-template-columns:1fr 380px;
+  gap:0;min-height:calc(100vh - 200px);
+}
+
+/* FORM SIDE */
+.form-side{
+  padding:50px;
+}
+
+.section-title{
+  font-family:'Playfair Display',serif;
+  font-size:20px;margin-bottom:24px;
+  color:var(--stone);
+  display:flex;align-items:center;gap:10px;
+}
+.section-title span{
+  width:28px;height:28px;border-radius:50%;
+  background:var(--terracotta);color:white;
+  font-family:'DM Sans',sans-serif;font-size:13px;
+  display:flex;align-items:center;justify-content:center;
+}
+
+.form-block{margin-bottom:40px;}
+
+/* MATERIAL CARDS */
+.material-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:12px;
+}
+.mat-card{
+  border:1.5px solid #ddd;border-radius:10px;
+  padding:16px 12px;cursor:pointer;transition:.2s;
+  text-align:center;background:white;
+}
+.mat-card:hover{border-color:var(--terracotta);}
+.mat-card.selected{border-color:var(--terracotta);background:#fdf5f0;}
+.mat-icon{font-size:28px;margin-bottom:8px;}
+.mat-name{font-size:13px;font-weight:500;color:var(--stone);}
+.mat-desc{font-size:11px;color:var(--warm-gray);margin-top:2px;}
+
+/* COLOR SWATCHES */
+.color-row{display:flex;flex-wrap:wrap;gap:10px;}
+.color-swatch{
+  width:44px;height:44px;border-radius:50%;cursor:pointer;
+  border:3px solid transparent;transition:.2s;position:relative;
+}
+.color-swatch.selected{border-color:var(--stone);}
+.color-swatch::after{
+  content:attr(data-label);
+  position:absolute;bottom:-20px;left:50%;transform:translateX(-50%);
+  font-size:10px;white-space:nowrap;color:var(--warm-gray);
+  opacity:0;transition:.2s;
+}
+.color-swatch:hover::after{opacity:1;}
+
+/* PATTERN SELECT */
+.pattern-grid{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:10px;
+}
+.pat-card{
+  border:1.5px solid #ddd;border-radius:8px;
+  padding:12px 8px;cursor:pointer;transition:.2s;
+  text-align:center;background:white;
+}
+.pat-card:hover{border-color:var(--terracotta);}
+.pat-card.selected{border-color:var(--terracotta);background:#fdf5f0;}
+.pat-svg{width:50px;height:50px;margin:0 auto 6px;}
+.pat-name{font-size:11px;color:var(--stone);}
+
+/* INPUTS */
+.input-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.field{margin-bottom:0;}
+label.field-label{
+  display:block;font-size:12px;letter-spacing:.5px;
+  color:var(--warm-gray);margin-bottom:8px;text-transform:uppercase;
+}
+input[type=number], select, textarea{
+  width:100%;padding:12px 14px;
+  border:1.5px solid #ddd;border-radius:8px;
+  font-family:'DM Sans',sans-serif;font-size:14px;
+  background:white;color:var(--stone);
+  transition:.2s;outline:none;
+}
+input[type=number]:focus, select:focus, textarea:focus{
+  border-color:var(--terracotta);
+}
+textarea{resize:vertical;min-height:80px;}
+
+/* PREVIEW SIDE */
+.preview-side{
+  background:var(--stone);
+  padding:40px 30px;
+  position:sticky;top:80px;
+  height:fit-content;
+}
+.preview-title{
+  font-family:'Playfair Display',serif;
+  color:var(--cream);font-size:18px;margin-bottom:24px;
+}
+
+.preview-canvas-wrap{
+  background:#1a1714;border-radius:12px;
+  overflow:hidden;margin-bottom:24px;
+  aspect-ratio:1;display:flex;align-items:center;justify-content:center;
+}
+#previewCanvas{max-width:100%;border-radius:8px;}
+.preview-placeholder{
+  color:var(--warm-gray);font-size:13px;text-align:center;padding:20px;
+}
+
+.summary-item{
+  display:flex;justify-content:space-between;
+  padding:10px 0;border-bottom:1px solid rgba(255,255,255,.08);
+}
+.summary-item:last-child{border-bottom:none;}
+.s-label{color:var(--warm-gray);font-size:12px;}
+.s-val{color:var(--sand);font-size:13px;font-weight:500;}
+.s-val.big{color:var(--gold);font-size:16px;font-family:'Playfair Display',serif;}
+
+.btn-generate{
+  width:100%;padding:16px;margin-top:24px;
+  background:var(--terracotta);color:white;
+  border:none;border-radius:10px;
+  font-family:'DM Sans',sans-serif;font-size:15px;font-weight:500;
+  cursor:pointer;transition:.2s;letter-spacing:.3px;
+}
+.btn-generate:hover{background:#b5572f;}
+.btn-generate:disabled{background:#666;cursor:not-allowed;}
+
+.btn-next{
+  width:100%;padding:14px;margin-top:10px;
+  background:transparent;color:var(--gold);
+  border:1.5px solid var(--gold);border-radius:10px;
+  font-family:'DM Sans',sans-serif;font-size:14px;
+  cursor:pointer;transition:.2s;
+}
+.btn-next:hover{background:var(--gold);color:var(--stone);}
+
+.status-msg{
+  text-align:center;color:var(--warm-gray);
+  font-size:12px;margin-top:10px;min-height:18px;
+}
+
+/* LOADER */
+.loader{
+  display:inline-block;width:16px;height:16px;
+  border:2px solid rgba(255,255,255,.3);
+  border-top-color:white;border-radius:50%;
+  animation:spin .7s linear infinite;vertical-align:middle;margin-right:8px;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* GROUT CONTROLS */
+.grout-row{display:flex;gap:16px;margin-top:16px;align-items:flex-end;}
+.grout-row .field{flex:1;}
+input[type=range]{
+  width:100%;accent-color:var(--terracotta);
+  height:4px;cursor:pointer;
+}
+input[type=color]{
+  width:44px;height:38px;padding:2px;
+  border:1.5px solid #ddd;border-radius:6px;cursor:pointer;
+}
+
+@media(max-width:900px){
+  .main{grid-template-columns:1fr;}
+  .preview-side{position:static;}
+  nav{padding:16px 20px;}
+  .form-side{padding:30px 20px;}
+  .hero-strip{padding:40px 20px 30px;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">✦ TileAI</div>
+  <div class="nav-links">
+    <a href="tile-form.html">ออกแบบ</a>
+    <a href="room-view.html">ดูห้อง</a>
+    <a href="chat.html">ปรึกษา AI</a>
+  </div>
+  <div class="nav-user" id="navUser"></div>
+</nav>
+
+<div class="progress-bar">
+  <div class="prog-step active">1 · ออกแบบ</div>
+  <div class="prog-step">2 · ดูในห้อง</div>
+  <div class="prog-step">3 · ปรึกษา AI</div>
+</div>
+
+<div class="hero-strip">
+  <div class="step-tag">ขั้นตอนที่ 1 / 3</div>
+  <h1>ออกแบบกระเบื้องในแบบของคุณ</h1>
+  <p>กรอกข้อมูลด้านล่าง แล้วให้ AI สร้างกระเบื้องตามที่คุณต้องการ</p>
+</div>
+
+<div class="main">
+  <div class="form-side">
+
+    <!-- MATERIAL -->
+    <div class="form-block">
+      <div class="section-title"><span>1</span> วัสดุกระเบื้อง</div>
+      <div class="material-grid">
+        <div class="mat-card selected" data-mat="หินอ่อน" onclick="selectMat(this)">
+          <div class="mat-icon">🪨</div>
+          <div class="mat-name">หินอ่อน</div>
+          <div class="mat-desc">Marble</div>
+        </div>
+        <div class="mat-card" data-mat="เซรามิก" onclick="selectMat(this)">
+          <div class="mat-icon">🏺</div>
+          <div class="mat-name">เซรามิก</div>
+          <div class="mat-desc">Ceramic</div>
+        </div>
+        <div class="mat-card" data-mat="ไม้สังเคราะห์" onclick="selectMat(this)">
+          <div class="mat-icon">🪵</div>
+          <div class="mat-name">ไม้สังเคราะห์</div>
+          <div class="mat-desc">Wood Look</div>
+        </div>
+        <div class="mat-card" data-mat="คอนกรีต" onclick="selectMat(this)">
+          <div class="mat-icon">🧱</div>
+          <div class="mat-name">คอนกรีต</div>
+          <div class="mat-desc">Concrete</div>
+        </div>
+        <div class="mat-card" data-mat="หินธรรมชาติ" onclick="selectMat(this)">
+          <div class="mat-icon">💎</div>
+          <div class="mat-name">หินธรรมชาติ</div>
+          <div class="mat-desc">Natural Stone</div>
+        </div>
+        <div class="mat-card" data-mat="โมเสก" onclick="selectMat(this)">
+          <div class="mat-icon">🎨</div>
+          <div class="mat-name">โมเสก</div>
+          <div class="mat-desc">Mosaic</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- COLOR -->
+    <div class="form-block">
+      <div class="section-title"><span>2</span> โทนสี</div>
+      <div class="color-row" id="colorRow">
+        <div class="color-swatch selected" style="background:#f5f0e8" data-color="ขาวครีม" data-label="ขาวครีม" onclick="selectColor(this)"></div>
+        <div class="color-swatch" style="background:#c4bdb5" data-color="เทาอุ่น" data-label="เทาอุ่น" onclick="selectColor(this)"></div>
+        <div class="color-swatch" style="background:#8b7355" data-color="น้ำตาล" data-label="น้ำตาล" onclick="selectColor(this)"></div>
+        <div class="color-swatch" style="background:#2c2825" data-color="ดำเข้ม" data-label="ดำเข้ม" onclick="selectColor(this)"></div>
+        <div class="color-swatch" style="background:#c4623a" data-color="เทอร์ราคอตต้า" data-label="เทอร์รา" onclick="selectColor(this)"></div>
+        <div class="color-swatch" style="background:#4a7c6f" data-color="เขียวซีด" data-label="เขียว" onclick="selectColor(this)"></div>
+        <div class="color-swatch" style="background:#d4a853" data-color="ทอง" data-label="ทอง" onclick="selectColor(this)"></div>
+        <div class="color-swatch" style="background:#b8c4d4" data-color="ฟ้าอ่อน" data-label="ฟ้า" onclick="selectColor(this)"></div>
+        <div class="color-swatch" style="background:#e8d5b0" data-color="เบจ" data-label="เบจ" onclick="selectColor(this)"></div>
+        <div class="color-swatch" style="background:#fff" data-color="ขาว" data-label="ขาว" onclick="selectColor(this)" style="border:1px solid #ddd"></div>
+      </div>
+      <div style="margin-top:20px">
+        <label class="field-label">รายละเอียดเพิ่มเติม (ลาย/พื้นผิว)</label>
+        <textarea id="extraDesc" placeholder="เช่น มีเส้นทองพาดอ่อนๆ, ลายไม้แนวตั้ง, ผิวด้านไม่มันเงา..."></textarea>
+      </div>
+    </div>
+
+    <!-- PATTERN -->
+    <div class="form-block">
+      <div class="section-title"><span>3</span> การจัดเรียง (Pattern)</div>
+      <div class="pattern-grid">
+        <div class="pat-card selected" data-pattern="grid" onclick="selectPattern(this)">
+          <svg class="pat-svg" viewBox="0 0 50 50">
+            <rect x="2" y="2" width="20" height="20" fill="none" stroke="#c4623a" stroke-width="1.5"/>
+            <rect x="28" y="2" width="20" height="20" fill="none" stroke="#c4623a" stroke-width="1.5"/>
+            <rect x="2" y="28" width="20" height="20" fill="none" stroke="#c4623a" stroke-width="1.5"/>
+            <rect x="28" y="28" width="20" height="20" fill="none" stroke="#c4623a" stroke-width="1.5"/>
+          </svg>
+          <div class="pat-name">กริด</div>
+        </div>
+        <div class="pat-card" data-pattern="halfdrop" onclick="selectPattern(this)">
+          <svg class="pat-svg" viewBox="0 0 50 50">
+            <rect x="2" y="2" width="20" height="20" fill="none" stroke="#888" stroke-width="1.5"/>
+            <rect x="28" y="12" width="20" height="20" fill="none" stroke="#888" stroke-width="1.5"/>
+            <rect x="2" y="28" width="20" height="20" fill="none" stroke="#888" stroke-width="1.5"/>
+          </svg>
+          <div class="pat-name">ครึ่งตก</div>
+        </div>
+        <div class="pat-card" data-pattern="mirror" onclick="selectPattern(this)">
+          <svg class="pat-svg" viewBox="0 0 50 50">
+            <rect x="2" y="2" width="20" height="46" fill="none" stroke="#888" stroke-width="1.5"/>
+            <rect x="28" y="2" width="20" height="46" fill="none" stroke="#888" stroke-width="1.5" transform="scale(-1,1) translate(-50,0)"/>
+            <line x1="25" y1="0" x2="25" y2="50" stroke="#888" stroke-width=".5" stroke-dasharray="3,2"/>
+          </svg>
+          <div class="pat-name">กระจก</div>
+        </div>
+        <div class="pat-card" data-pattern="diagonal" onclick="selectPattern(this)">
+          <svg class="pat-svg" viewBox="0 0 50 50">
+            <rect x="13" y="2" width="20" height="20" fill="none" stroke="#888" stroke-width="1.5" transform="rotate(45 23 12)"/>
+            <rect x="13" y="28" width="20" height="20" fill="none" stroke="#888" stroke-width="1.5" transform="rotate(45 23 38)"/>
+          </svg>
+          <div class="pat-name">ทแยง</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SIZE & AREA -->
+    <div class="form-block">
+      <div class="section-title"><span>4</span> ขนาดและปริมาณ</div>
+      <div class="input-row">
+        <div class="field">
+          <label class="field-label">ขนาดกระเบื้อง</label>
+          <select id="tileSize" onchange="updateSummary()">
+            <option value="30x30">30×30 ซม.</option>
+            <option value="60x60" selected>60×60 ซม.</option>
+            <option value="60x120">60×120 ซม.</option>
+            <option value="80x80">80×80 ซม.</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="field-label">พื้นที่ (ตารางเมตร)</label>
+          <input type="number" id="area" value="20" min="1" max="1000" onchange="updateSummary()">
+        </div>
+      </div>
+    </div>
+
+    <!-- GROUT -->
+    <div class="form-block">
+      <div class="section-title"><span>5</span> รอยต่อกระเบื้อง (Grout)</div>
+      <div class="grout-row">
+        <div class="field">
+          <label class="field-label">ความกว้างรอยต่อ</label>
+          <input type="range" id="groutW" min="0" max="15" value="4" oninput="updateGrout()">
+        </div>
+        <div class="field" style="flex:0 0 auto">
+          <label class="field-label">สีรอยต่อ</label>
+          <input type="color" id="groutC" value="#dddddd" oninput="updateGrout()">
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /form-side -->
+
+  <!-- PREVIEW SIDE -->
+  <div class="preview-side">
+    <div class="preview-title">ตัวอย่างกระเบื้อง</div>
+
+    <div class="preview-canvas-wrap">
+      <canvas id="previewCanvas" width="320" height="320"></canvas>
+      <div class="preview-placeholder" id="previewPlaceholder">กด "Generate" เพื่อสร้างกระเบื้อง</div>
+    </div>
+
+    <div class="summary-item">
+      <span class="s-label">วัสดุ</span>
+      <span class="s-val" id="sumMat">หินอ่อน</span>
+    </div>
+    <div class="summary-item">
+      <span class="s-label">สี</span>
+      <span class="s-val" id="sumColor">ขาวครีม</span>
+    </div>
+    <div class="summary-item">
+      <span class="s-label">ขนาด</span>
+      <span class="s-val" id="sumSize">60×60 ซม.</span>
+    </div>
+    <div class="summary-item">
+      <span class="s-label">พื้นที่</span>
+      <span class="s-val" id="sumArea">20 ตร.ม.</span>
+    </div>
+    <div class="summary-item">
+      <span class="s-label">จำนวนแผ่น</span>
+      <span class="s-val" id="sumTiles">—</span>
+    </div>
+    <div class="summary-item">
+      <span class="s-label">ราคาประมาณ</span>
+      <span class="s-val big" id="sumPrice">—</span>
+    </div>
+
+    <button class="btn-generate" id="btnGen" onclick="generateTile()">✦ Generate กระเบื้อง</button>
+    <button class="btn-next" onclick="goNext()" id="btnNext" style="display:none">ดูในห้องจริง →</button>
+    <div class="status-msg" id="statusMsg"></div>
+  </div>
+</div>
+
+<script>
+/* AUTH */
+const user = JSON.parse(localStorage.getItem("user") || "null");
+if(!user){ window.location.href="login.html"; }
+document.getElementById("navUser").textContent = user?.email || "";
+
+/* STATE */
+let state = {
+  material: "หินอ่อน",
+  color: "ขาวครีม",
+  pattern: "grid",
+  size: "60x60",
+  area: 20,
+  groutW: 4,
+  groutColor: "#dddddd",
+  extra: "",
+  tileUrl: null
+};
+
+const PRICES = {"30x30":70,"60x60":120,"60x120":220,"80x80":180};
+const AREA_PER = {"30x30":.09,"60x60":.36,"60x120":.72,"80x80":.64};
+
+/* SELECTORS */
+function selectMat(el){
+  document.querySelectorAll(".mat-card").forEach(e=>e.classList.remove("selected"));
+  el.classList.add("selected");
+  state.material = el.dataset.mat;
+  document.getElementById("sumMat").textContent = state.material;
+  updateSummary();
+}
+function selectColor(el){
+  document.querySelectorAll(".color-swatch").forEach(e=>e.classList.remove("selected"));
+  el.classList.add("selected");
+  state.color = el.dataset.color;
+  document.getElementById("sumColor").textContent = state.color;
+}
+function selectPattern(el){
+  document.querySelectorAll(".pat-card").forEach(e=>e.classList.remove("selected"));
+  el.classList.add("selected");
+  state.pattern = el.dataset.pattern;
+  if(state.tileUrl) renderPattern(state.tileUrl);
+}
+
+/* SUMMARY */
+function updateSummary(){
+  state.size = document.getElementById("tileSize").value;
+  state.area = parseFloat(document.getElementById("area").value)||1;
+  const tiles = Math.ceil(state.area / AREA_PER[state.size]);
+  const price = PRICES[state.size] * tiles;
+  document.getElementById("sumSize").textContent = state.size.replace("x","×")+" ซม.";
+  document.getElementById("sumArea").textContent = state.area+" ตร.ม.";
+  document.getElementById("sumTiles").textContent = tiles.toLocaleString()+" แผ่น";
+  document.getElementById("sumPrice").textContent = price.toLocaleString()+" ฿";
+}
+updateSummary();
+
+/* GROUT */
+function updateGrout(){
+  state.groutW = parseInt(document.getElementById("groutW").value);
+  state.groutColor = document.getElementById("groutC").value;
+  if(state.tileUrl) renderPattern(state.tileUrl);
+}
+
+/* GENERATE */
+async function generateTile(){
+  const extra = document.getElementById("extraDesc").value;
+  const prompt = `${state.material} tile, ${state.color} color tone, ${extra||"clean minimal surface"}, seamless tileable texture, top view, photorealistic, 4K, studio lighting`;
+
+  const btn = document.getElementById("btnGen");
+  btn.disabled = true;
+  btn.innerHTML = '<span class="loader"></span>กำลังสร้าง...';
+  document.getElementById("statusMsg").textContent = "AI กำลังสร้างกระเบื้องของคุณ...";
+  document.getElementById("previewPlaceholder").style.display = "none";
+
+  try{
+    const res = await fetch("/generate-tile",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({
+        prompt,
+        tileSize: state.size,
+        dpi:"300",
+        pattern: state.pattern,
+        userId: user.id
+      })
+    });
+    const data = await res.json();
+    if(!data.tileUrl) throw new Error("ไม่ได้รับรูป");
+
+    state.tileUrl = window.location.origin + data.tileUrl;
+    localStorage.setItem("tileUrl", state.tileUrl);
+    localStorage.setItem("tileConfig", JSON.stringify(state));
+
+    renderPattern(state.tileUrl);
+    document.getElementById("statusMsg").textContent = "✓ สร้างสำเร็จ!";
+    document.getElementById("btnNext").style.display = "block";
+  }catch(e){
+    document.getElementById("statusMsg").textContent = "เกิดข้อผิดพลาด: "+e.message;
+    document.getElementById("previewPlaceholder").style.display = "block";
+  }finally{
+    btn.disabled=false;
+    btn.innerHTML="✦ Generate ใหม่";
+  }
+}
+
+/* RENDER PATTERN ON CANVAS */
+function renderPattern(url){
+  const canvas = document.getElementById("previewCanvas");
+  const ctx = canvas.getContext("2d");
+  const img = new Image();
+  img.crossOrigin="anonymous";
+  img.onload = ()=>{
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    const tpx = 100;
+    const gw = state.groutW;
+    const pat = state.pattern;
+    for(let y=0;y<canvas.height;y+=tpx+gw){
+      for(let x=0;x<canvas.width;x+=tpx+gw){
+        let ox=x, oy=y;
+        if(pat==="halfdrop" && Math.floor(y/(tpx+gw))%2===1) ox+=tpx/2;
+        if(pat==="mirror" && Math.floor(x/(tpx+gw))%2===1){
+          ctx.save();ctx.scale(-1,1);
+          ctx.drawImage(img,-ox-tpx,oy,tpx,tpx);ctx.restore();
+        } else {
+          ctx.drawImage(img,ox,oy,tpx,tpx);
+        }
+        ctx.fillStyle=state.groutColor;
+        ctx.fillRect(ox+tpx,oy,gw,tpx);
+        ctx.fillRect(ox,oy+tpx,tpx+gw,gw);
+      }
+    }
+  };
+  img.src = url;
+}
+
+/* RESTORE */
+const savedUrl = localStorage.getItem("tileUrl");
+if(savedUrl){
+  state.tileUrl=savedUrl;
+  renderPattern(savedUrl);
+  document.getElementById("previewPlaceholder").style.display="none";
+  document.getElementById("btnNext").style.display="block";
+  document.getElementById("btnGen").innerHTML="✦ Generate ใหม่";
+}
+
+function goNext(){ window.location.href="room-view.html"; }
+</script>
+</body>
+</html>

@@ -91,7 +91,7 @@
 
     // ถ้า login อยู่แล้ว → เด้งไป home
     if (localStorage.getItem("user")) {
-        window.location.href = "home.html";
+        window.location.href = "index.html";
     }
 
     async function login(event) {
@@ -116,7 +116,7 @@
                 // ✅ เก็บ user object ทั้งก้อน
                 localStorage.setItem("user", JSON.stringify(data.user));
 
-                window.location.href = "home.html";
+                window.location.href = "index.html";
 
             } else {
                 alert(data.message || data.error || "Login failed");
