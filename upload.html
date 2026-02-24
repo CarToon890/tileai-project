@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Upload Room - TileAI</title>
+
+<style>
+body{
+    margin:0;
+    font-family: Arial, sans-serif;
+    background:#f3f3f3;
+}
+
+.navbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:15px 40px;
+    background:white;
+    border-bottom:1px solid #ddd;
+}
+
+.logo{
+    font-weight:bold;
+    font-size:20px;
+    color:#0a3c80;
+}
+
+.step{
+    font-size:14px;
+    color:#555;
+}
+
+.container{
+    display:flex;
+    padding:40px;
+    gap:40px;
+}
+
+.left{
+    flex:1;
+}
+
+.left h2{
+    color:#0a3c80;
+}
+
+.left p{
+    color:#666;
+}
+
+.upload-box{
+    margin-top:30px;
+    border:2px dashed #ccc;
+    border-radius:15px;
+    padding:40px;
+    text-align:center;
+    background:white;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+.upload-box.dragover{
+    border-color:#1f4f8b;
+    background:#eef5ff;
+}
+
+.upload-btn{
+    margin-top:15px;
+    padding:12px 30px;
+    border:none;
+    border-radius:25px;
+    background:#1f4f8b;
+    color:white;
+    font-size:16px;
+    cursor:pointer;
+}
+
+.upload-btn:hover{
+    background:#2c6bb2;
+}
+
+.support-text{
+    font-size:12px;
+    margin-top:10px;
+    color:#777;
+}
+
+.right{
+    flex:1;
+}
+
+.preview-box{
+    background:white;
+    padding:15px;
+    border-radius:20px;
+    box-shadow:0 5px 20px rgba(0,0,0,0.05);
+}
+
+.preview-box img{
+    width:100%;
+    border-radius:15px;
+    object-fit:cover;
+}
+
+.footer{
+    display:flex;
+    justify-content:space-between;
+    padding:20px 40px;
+    border-top:1px solid #ddd;
+    background:white;
+}
+
+.footer button{
+    padding:10px 25px;
+    border:none;
+    border-radius:20px;
+    cursor:pointer;
+}
+
+.back{
+    background:#eee;
+}
+
+.next{
+    background:#1f4f8b;
+    color:white;
+}
+
+.next:hover{
+    background:#2c6bb2;
+}
+</style>
+</head>
+
+<body>
+
+<div class="navbar">
+    <div class="logo">✨ TileAI</div>
+    <div class="step">ขั้นตอนที่ 1 / 5</div>
+</div>
+
+<div class="container">
+
+    <div class="left">
+        <h2>Upload Room & Analysis</h2>
+        <p>Upload a photo of your room and let our AI analyze the floor and walls.</p>
+
+        <div class="upload-box" id="uploadBox">
+            <p>Drag & drop your photo here</p>
+            <input type="file" id="roomImage" accept="image/png,image/jpeg" hidden>
+            <button class="upload-btn" onclick="document.getElementById('roomImage').click()">
+                Upload Room Photo
+            </button>
+            <div class="support-text">
+                Supported Formats: JPG, PNG Max 15 MB
+            </div>
+        </div>
+    </div>
+
+    <div class="right">
+        <div class="preview-box">
+            <img id="preview" src="https://images.unsplash.com/photo-1505691938895-1758d7feb511">
+        </div>
+    </div>
+
+</div>
+
+<div class="footer">
+    <button class="back" onclick="goBack()">← BACK</button>
+    <button class="next" onclick="goNext()">NEXT STEP →</button>
+</div>
+
+<script>
+
+/* ================= LOGIN CHECK ================= */
+
+const userData = localStorage.getItem("user");
+
+if(!userData){
+    window.location.href = "login.html";
+}else{
+    try{
+        JSON.parse(userData);
+    }catch(err){
+        localStorage.removeItem("user");
+        window.location.href = "login.html";
+    }
+}
+
+/* ================= VARIABLES ================= */
+
+const uploadBox = document.getElementById("uploadBox");
+const fileInput = document.getElementById("roomImage");
+const preview = document.getElementById("preview");
+
+let uploadedImageUrl = localStorage.getItem("roomImage") || null;
+
+/* โหลด preview ถ้ามี */
+if(uploadedImageUrl){
+    preview.src = window.location.origin + uploadedImageUrl;
+}
+
+/* ================= DRAG EVENTS ================= */
+
+uploadBox.addEventListener("dragover", e => {
+    e.preventDefault();
+    uploadBox.classList.add("dragover");
+});
+
+uploadBox.addEventListener("dragleave", () => {
+    uploadBox.classList.remove("dragover");
+});
+
+uploadBox.addEventListener("drop", e => {
+    e.preventDefault();
+    uploadBox.classList.remove("dragover");
+
+    const file = e.dataTransfer.files[0];
+    fileInput.files = e.dataTransfer.files;
+    handleUpload(file);
+});
+
+/* ================= FILE SELECT ================= */
+
+fileInput.addEventListener("change", () => {
+    const file = fileInput.files[0];
+    handleUpload(file);
+});
+
+/* ================= UPLOAD FUNCTION ================= */
+
+async function handleUpload(file){
+
+    if(!file){
+        alert("กรุณาเลือกไฟล์");
+        return;
+    }
+
+    if(!["image/jpeg","image/png"].includes(file.type)){
+        alert("รองรับเฉพาะ JPG และ PNG");
+        return;
+    }
+
+    if(file.size > 15 * 1024 * 1024){
+        alert("ไฟล์ใหญ่เกิน 15MB");
+        return;
+    }
+
+    try{
+
+        const formData = new FormData();
+        formData.append("roomImage", file);
+
+        const response = await fetch("/upload-room", {
+            method: "POST",
+            body: formData
+        });
+
+        const text = await response.text();
+
+        if(!response.ok){
+            throw new Error(text);
+        }
+
+        let data;
+        try{
+            data = JSON.parse(text);
+        }catch{
+            throw new Error("Server response is not JSON");
+        }
+
+        if(!data.imageUrl){
+            throw new Error("Invalid server response");
+        }
+
+        uploadedImageUrl = data.imageUrl;
+        localStorage.setItem("roomImage", uploadedImageUrl);
+
+        preview.src = window.location.origin + uploadedImageUrl;
+
+        console.log("Upload success:", uploadedImageUrl);
+
+    }catch(error){
+        console.error("Upload error:", error);
+        alert("อัปโหลดไม่สำเร็จ: " + error.message);
+    }
+}
+
+/* ================= NAVIGATION ================= */
+
+function goBack(){
+    window.location.href = "home.html";
+}
+
+function goNext(){
+    if(!uploadedImageUrl){
+        alert("กรุณาอัปโหลดภาพก่อน");
+        return;
+    }
+    window.location.href = "generator.html";
+}
+
+</script>
+
+</body>
+</html>
