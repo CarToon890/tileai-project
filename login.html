@@ -97,10 +97,20 @@ button:hover {
 
 <script>
 
-    // ถ้า login อยู่แล้ว → เด้งไป home
-    if (localStorage.getItem("user")) {
-        window.location.href = "home.html";
+/* ================= AUTO REDIRECT ================= */
+
+const savedUser = localStorage.getItem("user");
+
+if (savedUser) {
+    try {
+        const parsed = JSON.parse(savedUser);
+        if (parsed && parsed.id) {
+            window.location.href = "home.html";
+        }
+    } catch (e) {
+        localStorage.removeItem("user");
     }
+}
 
 /* ================= LOGIN ================= */
 
@@ -156,7 +166,7 @@ async function login(event) {
             email: data.user.email
         }));
 
-                window.location.href = "home.html";
+        window.location.href = "home.html";
 
     } catch (error) {
         console.error(error);

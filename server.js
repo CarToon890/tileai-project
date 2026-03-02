@@ -48,13 +48,17 @@ if (!process.env.OPENAI_API_KEY) {
   process.exit(1);
 }
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
 
 /* ---------------- MULTER ---------------- */
 
 const storage = multer.diskStorage({
   destination: uploadDir,
-  filename: (req, file, cb) => cb(null, uuidv4() + path.extname(file.originalname)),
+  filename: (req, file, cb) => {
+    cb(null, uuidv4() + path.extname(file.originalname));
+  },
 });
 
 const upload = multer({
@@ -102,8 +106,16 @@ app.post("/login", async (req, res) => {
       [email]
     );
 
-    const valid = await bcrypt.compare(password, result.rows[0].password);
-    if (!valid) return res.status(401).json({ message: "Wrong password" });
+    if (result.rows.length === 0)
+      return res.status(400).send("User not found");
+
+    const valid = await bcrypt.compare(
+      password,
+      result.rows[0].password
+    );
+
+    if (!valid)
+      return res.status(401).send("Wrong password");
 
     res.json({
       user: {
@@ -111,6 +123,7 @@ app.post("/login", async (req, res) => {
         email: result.rows[0].email,
       },
     });
+
   } catch (err) {
     console.error(err);
     res.status(500).send("Server error");
@@ -168,8 +181,10 @@ photorealistic
     });
 
     const imageBase64 = result.data[0].b64_json;
+
     const fileName = uuidv4() + ".png";
     const filePath = path.join(uploadDir, fileName);
+
     fs.writeFileSync(filePath, Buffer.from(imageBase64, "base64"));
 
     const tileUrl = `/uploads/${fileName}`;
@@ -190,9 +205,6 @@ photorealistic
     );
 
     res.json({ tileUrl });
-
-    const reply = completion.choices[0]?.message?.content || "ขออภัย ไม่สามารถตอบได้ในขณะนี้";
-    res.json({ reply });
 
   } catch (err) {
     console.error("AI error:", err);
