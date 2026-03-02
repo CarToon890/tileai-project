@@ -6,66 +6,72 @@
 <title>Login - TileAI</title>
 
 <style>
-    body {
-        margin: 0;
-        font-family: Arial, sans-serif;
-        height: 100vh;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        background: linear-gradient(to bottom right, #dfe6ed, #cfd8e3);
-    }
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(to bottom right, #dfe6ed, #cfd8e3);
+}
 
-    .login-card {
-        background: white;
-        padding: 40px;
-        width: 400px;
-        border-radius: 15px;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-        text-align: center;
-    }
+.login-card {
+    background: white;
+    padding: 40px;
+    width: 400px;
+    border-radius: 15px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    text-align: center;
+}
 
-    h1 { margin-bottom: 10px; }
+h1 { margin-bottom: 10px; }
 
-    p {
-        color: gray;
-        margin-bottom: 30px;
-    }
+p {
+    color: gray;
+    margin-bottom: 30px;
+}
 
-    input {
-        width: 100%;
-        padding: 12px;
-        margin: 10px 0;
-        border-radius: 8px;
-        border: 1px solid #ccc;
-        font-size: 14px;
-    }
+input {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+}
 
-    button {
-        width: 100%;
-        padding: 12px;
-        margin-top: 20px;
-        background: #1e2a3a;
-        color: white;
-        border: none;
-        border-radius: 8px;
-        font-size: 16px;
-        cursor: pointer;
-    }
+button {
+    width: 100%;
+    padding: 12px;
+    margin-top: 20px;
+    background: #1e2a3a;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+}
 
-    button:hover {
-        background: #2d3e55;
-    }
+button:hover {
+    background: #2d3e55;
+}
 
-    .signup {
-        margin-top: 20px;
-    }
+.signup {
+    margin-top: 20px;
+}
 
-    .signup a {
-        color: blue;
-        text-decoration: none;
-        cursor: pointer;
-    }
+.signup a {
+    color: blue;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.error {
+    color: red;
+    margin-top: 10px;
+    font-size: 14px;
+}
 </style>
 </head>
 
@@ -75,11 +81,13 @@
     <h1>Welcome Back</h1>
     <p>Log in to your account</p>
 
-    <form onsubmit="login(event)">
+    <form id="loginForm">
         <input type="email" id="email" placeholder="Enter your email" required>
         <input type="password" id="password" placeholder="Enter your password" required>
-        <button type="submit">Log In</button>
+        <button type="submit" id="loginBtn">Log In</button>
     </form>
+
+    <div class="error" id="errorMsg"></div>
 
     <div class="signup">
         Don’t have an account? 
@@ -91,46 +99,78 @@
 
     // ถ้า login อยู่แล้ว → เด้งไป home
     if (localStorage.getItem("user")) {
-        window.location.href = "index.html";
+        window.location.href = "home.html";
     }
 
-    async function login(event) {
-        event.preventDefault();
+/* ================= LOGIN ================= */
 
-        const email = document.getElementById("email").value;
-        const password = document.getElementById("password").value;
+document.getElementById("loginForm").addEventListener("submit", login);
 
-        try {
-            const response = await fetch("/login", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({ email, password })
-            });
+async function login(event) {
+    event.preventDefault();
 
-            const data = await response.json();
+    const errorMsg = document.getElementById("errorMsg");
+    const loginBtn = document.getElementById("loginBtn");
 
-            if (response.ok) {
+    errorMsg.innerText = "";
+    loginBtn.disabled = true;
+    loginBtn.innerText = "Logging in...";
 
-                // ✅ เก็บ user object ทั้งก้อน
-                localStorage.setItem("user", JSON.stringify(data.user));
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value.trim();
 
-                window.location.href = "index.html";
+    try {
+        const response = await fetch("/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, password })
+        });
 
-            } else {
-                alert(data.message || data.error || "Login failed");
-            }
+        let data;
 
-        } catch (error) {
-            alert("ไม่สามารถเชื่อมต่อ Server ได้");
-            console.error(error);
+        // รองรับกรณี server ส่ง text กลับมา
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+            data = await response.json();
+        } else {
+            data = await response.text();
         }
-    }
 
-    function goRegister() {
-        window.location.href = "register.html";
+        if (!response.ok) {
+            errorMsg.innerText = typeof data === "string" ? data : "Login failed";
+            loginBtn.disabled = false;
+            loginBtn.innerText = "Log In";
+            return;
+        }
+
+        if (!data.user || !data.user.id) {
+            errorMsg.innerText = "Invalid user data from server";
+            loginBtn.disabled = false;
+            loginBtn.innerText = "Log In";
+            return;
+        }
+
+        // ✅ Save user correctly
+        localStorage.setItem("user", JSON.stringify({
+            id: data.user.id,
+            email: data.user.email
+        }));
+
+                window.location.href = "home.html";
+
+    } catch (error) {
+        console.error(error);
+        errorMsg.innerText = "Cannot connect to server";
+        loginBtn.disabled = false;
+        loginBtn.innerText = "Log In";
     }
+}
+
+/* ================= REGISTER REDIRECT ================= */
+
+function goRegister() {
+    window.location.href = "register.html";
+}
 
 </script>
 
