@@ -1,55 +1,57 @@
+/* ================================================================
+   room3d.js — Three.js 3D Room Viewer
+   ราคาจัดการใน generator.html ทั้งหมด ไฟล์นี้รับผิดชอบแค่ 3D
+   ================================================================ */
+
 let scene, camera, renderer, controls;
 let floor, wall1, wall2, wall3, wall4;
-let zoom = 1;
+let currentTextureUrl = null;
 
-/* ================= PRICE CONFIG ================= */
-
-const basePrices = {
-  "30x30": 70,
-  "60x60": 120,
-  "60x120": 220,
-  "80x80": 180
-};
-
-const areaPerTile = {
-  "30x30": 0.09,
-  "60x60": 0.36,
-  "60x120": 0.72,
-  "80x80": 0.64
-};
-
-/* ================= INIT ================= */
-
+/* ── INIT ── */
 window.addEventListener("DOMContentLoaded", () => {
   init();
-  updateSummary();
   attachEvents();
 });
 
 function init() {
-
   scene = new THREE.Scene();
-  scene.background = new THREE.Color(0xf0f0f0);
+  scene.background = new THREE.Color(0x0f172a);
 
   const viewer = document.getElementById("viewer");
 
   camera = new THREE.PerspectiveCamera(
-    60,
+    55,
     viewer.clientWidth / viewer.clientHeight,
     0.1,
     1000
   );
-  camera.position.set(6, 5, 6);
+  camera.position.set(7, 5, 7);
 
   renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setPixelRatio(window.devicePixelRatio);
+  renderer.shadowMap.enabled = true;
   renderer.setSize(viewer.clientWidth, viewer.clientHeight);
   viewer.appendChild(renderer.domElement);
 
   controls = new THREE.OrbitControls(camera, renderer.domElement);
-  controls.enableDamping = true;
+  controls.enableDamping  = true;
+  controls.dampingFactor  = 0.08;
+  controls.minDistance    = 3;
+  controls.maxDistance    = 20;
+  controls.maxPolarAngle  = Math.PI / 2.1;
 
-  const light = new THREE.HemisphereLight(0xffffff, 0x444444, 1.2);
-  scene.add(light);
+  // Lighting
+  const ambient = new THREE.AmbientLight(0xffffff, 0.0);
+  scene.add(ambient);
+
+  const sun = new THREE.DirectionalLight(0xfff5e4, 0.5);
+  sun.position.set(5, 10, 5);
+  sun.castShadow = true;
+  scene.add(sun);
+
+  const fill = new THREE.DirectionalLight(0xe8f0ff, 0.4);
+  fill.position.set(-5, 3, -5);
+  scene.add(fill);
 
   createRoom();
   animate();
@@ -59,129 +61,98 @@ function init() {
 
 function onResize() {
   const viewer = document.getElementById("viewer");
+  if (!viewer) return;
   camera.aspect = viewer.clientWidth / viewer.clientHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(viewer.clientWidth, viewer.clientHeight);
 }
 
-/* ================= ROOM ================= */
-
+/* ── ROOM ── */
 function createRoom() {
 
-  const material = new THREE.MeshStandardMaterial({ color: 0xffffff });
+  const wallMat  = new THREE.MeshStandardMaterial({ color: 0xf8f5f0 });
+  const floorMat = new THREE.MeshStandardMaterial({ color: 0xcccccc });
 
+  // Floor
   const floorGeo = new THREE.PlaneGeometry(10, 10);
-  floor = new THREE.Mesh(floorGeo, material.clone());
+  floor = new THREE.Mesh(floorGeo, floorMat);
   floor.rotation.x = -Math.PI / 2;
+  floor.receiveShadow = true;
   scene.add(floor);
 
-  const wallGeo = new THREE.PlaneGeometry(10, 5);
-
-  wall1 = new THREE.Mesh(wallGeo, material.clone());
+  // Back wall
+  wall1 = new THREE.Mesh(new THREE.PlaneGeometry(10, 5), wallMat.clone());
   wall1.position.set(0, 2.5, -5);
   scene.add(wall1);
 
-  wall2 = wall1.clone();
+  // Left wall
+  wall2 = new THREE.Mesh(new THREE.PlaneGeometry(10, 5), wallMat.clone());
   wall2.rotation.y = Math.PI / 2;
   wall2.position.set(-5, 2.5, 0);
   scene.add(wall2);
 
-  wall3 = wall1.clone();
-  wall3.rotation.y = Math.PI;
-  wall3.position.set(0, 2.5, 5);
-  scene.add(wall3);
-
-  wall4 = wall1.clone();
-  wall4.rotation.y = -Math.PI / 2;
-  wall4.position.set(5, 2.5, 0);
-  scene.add(wall4);
+  // Ceiling hint (light plane)
+  const ceilGeo = new THREE.PlaneGeometry(10, 10);
+  const ceilMat = new THREE.MeshStandardMaterial({ color: 0xffffff, side: THREE.DoubleSide });
+  const ceil    = new THREE.Mesh(ceilGeo, ceilMat);
+  ceil.rotation.x = Math.PI / 2;
+  ceil.position.y = 5;
+  scene.add(ceil);
 }
 
-/* ================= APPLY TEXTURE ================= */
-
+/* ── APPLY TEXTURE ── */
 window.applyTexture = function (url) {
-
   if (!url) return;
-
-  const loader = new THREE.TextureLoader();
-
-  loader.load(url, (texture) => {
-
-    texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-    texture.repeat.set(4 * zoom, 4 * zoom);
-
-    [floor, wall1, wall2, wall3, wall4].forEach(mesh => {
-      mesh.material.map = texture;
-      mesh.material.needsUpdate = true;
-    });
-
-  });
+  currentTextureUrl = url;
+  reloadTexture();
 };
 
-/* ================= ANIMATION ================= */
+function reloadTexture() {
+  if (!currentTextureUrl) return;
 
+  const sizeEl = document.getElementById("sizeGroup");
+  const activePill = sizeEl ? sizeEl.querySelector(".pill.active") : null;
+  const size   = activePill ? activePill.dataset.size : "60x60";
+
+  // repeatMap: [S, T] — พื้น 10x10m หารด้วยขนาดกระเบื้องจริง
+  // 30x30cm  → 10/0.3 ≈ 33 tiles → rep 5
+  // 60x60cm  → 10/0.6 ≈ 16 tiles → rep 4
+  // 60x120cm → wide 10/0.6=16, deep 10/1.2=8 → [4, 2]
+  // 80x80cm  → 10/0.8 ≈ 12 tiles → rep 3
+  const repeatMap = {
+    "30x30":  [5, 5],
+    "60x60":  [4, 4],
+    "60x120": [4, 2],
+    "80x80":  [3, 3],
+  };
+  const [repS, repT] = repeatMap[size] || [4, 4];
+
+  const loader = new THREE.TextureLoader();
+  loader.load(currentTextureUrl, (texture) => {
+    texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+    texture.repeat.set(repS, repT);
+    texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
+
+    // ใส่เฉพาะ floor
+    floor.material.map         = texture;
+    floor.material.color.set(0xffffff);
+    floor.material.needsUpdate = true;
+  });
+}
+
+/* ── ZOOM (เรียกจาก generator เมื่อเปลี่ยน size) ── */
+window.updateZoom = function () {
+  reloadTexture();
+};
+
+/* ── EVENTS ── */
+function attachEvents() {
+  // ไม่ต้องจัดการราคาอีกแล้ว ทำหมดใน generator.html
+}
+
+/* ── ANIMATE ── */
 function animate() {
   requestAnimationFrame(animate);
   controls.update();
   renderer.render(scene, camera);
-}
-
-/* ================= PRICE ================= */
-
-function calculatePrice() {
-
-  const tileSize = document.getElementById("tileSize")?.value;
-  const dpi = document.getElementById("dpi")?.value;
-
-  let base = basePrices[tileSize] || 0;
-
-  if (dpi === "600") base *= 1.2;
-  if (dpi === "150") base *= 0.9;
-
-  return Math.round(base);
-}
-
-function calculateProduction() {
-
-  const tileSize = document.getElementById("tileSize")?.value;
-  const area = areaPerTile[tileSize];
-
-  if (!area) return 0;
-
-  return Math.ceil(100 / area);
-}
-
-function updateSummary() {
-
-  const price = calculatePrice();
-  const minTiles = calculateProduction();
-
-  document.getElementById("pricePerTile").innerText = price;
-  document.getElementById("minTiles").innerText = minTiles;
-  document.getElementById("totalCost").innerText = price * minTiles;
-}
-
-/* ================= EVENTS ================= */
-
-function attachEvents() {
-
-  document.addEventListener("input", function (e) {
-
-    if (e.target.id === "zoomControl") {
-
-      zoom = parseFloat(e.target.value);
-
-      if (floor?.material?.map) {
-        floor.material.map.repeat.set(4 * zoom, 4 * zoom);
-
-        [wall1, wall2, wall3, wall4].forEach(mesh => {
-          mesh.material.map.repeat.set(4 * zoom, 4 * zoom);
-        });
-      }
-    }
-
-    if (e.target.id === "tileSize" || e.target.id === "dpi") {
-      updateSummary();
-    }
-  });
 }

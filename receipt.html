@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TileAI — ใบเสร็จ</title>
+
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --navy: #1e2a3a;
+  --blue: #3b82f6;
+  --bg: #f1f5f9;
+  --border: #e2e8f0;
+  --text: #1e293b;
+  --muted: #64748b;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'IBM Plex Sans Thai', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding: 32px 16px;
+}
+
+/* ── NAV ── */
+nav {
+  background: var(--navy);
+  padding: 0 24px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 10;
+}
+.nav-logo { font-size: 16px; font-weight: 600; color: #fff; }
+.nav-back {
+  font-size: 13px;
+  color: #94a3b8;
+  cursor: pointer;
+  background: none;
+  border: none;
+  font-family: inherit;
+}
+.nav-back:hover { color: #fff; }
+
+/* ── WRAPPER ── */
+.wrapper {
+  max-width: 680px;
+  margin: 72px auto 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ── RECEIPT CARD ── */
+.receipt {
+  background: #fff;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+/* Header */
+.receipt-header {
+  background: var(--navy);
+  padding: 24px 28px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+.receipt-header-left .brand {
+  font-size: 20px;
+  font-weight: 600;
+  color: #fff;
+  letter-spacing: .5px;
+}
+.receipt-header-left .sub {
+  font-size: 12px;
+  color: #94a3b8;
+  margin-top: 3px;
+}
+.receipt-header-right {
+  text-align: right;
+}
+.receipt-header-right .doc-label {
+  font-size: 11px;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.receipt-header-right .doc-number {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 14px;
+  color: #fff;
+  margin-top: 3px;
+}
+.receipt-header-right .doc-date {
+  font-size: 12px;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+
+/* Body */
+.receipt-body {
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Tile preview */
+.tile-preview-row {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+.tile-img-wrap {
+  width: 100px;
+  height: 100px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  flex-shrink: 0;
+  background: #f8fafc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+}
+.tile-img-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.tile-meta {
+  flex: 1;
+}
+.tile-meta .label {
+  font-size: 11px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .8px;
+  margin-bottom: 4px;
+}
+.tile-meta .value {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text);
+  margin-bottom: 10px;
+}
+.tile-meta .tags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.tag {
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  background: #f1f5f9;
+  color: var(--muted);
+  border: 1px solid var(--border);
+}
+
+/* Divider */
+.divider {
+  border: none;
+  border-top: 1px solid var(--border);
+}
+
+/* Cost table */
+.cost-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.cost-table tr td {
+  padding: 8px 0;
+  font-size: 13px;
+  border-bottom: 1px dashed var(--border);
+}
+.cost-table tr:last-child td { border-bottom: none; }
+.cost-table td:last-child {
+  text-align: right;
+  font-family: 'IBM Plex Mono', monospace;
+  color: var(--text);
+}
+.cost-table td:first-child { color: var(--muted); }
+.cost-table tr.subtotal td {
+  font-weight: 500;
+  color: var(--text);
+  border-bottom: 1px solid var(--border);
+}
+
+/* Total row */
+.total-row {
+  background: var(--navy);
+  border-radius: 10px;
+  padding: 16px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.total-row .total-label {
+  font-size: 14px;
+  color: #94a3b8;
+}
+.total-row .total-amount {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 24px;
+  font-weight: 500;
+  color: #fff;
+}
+.total-row .total-unit {
+  font-size: 13px;
+  color: #94a3b8;
+  margin-left: 6px;
+}
+
+/* Footer note */
+.receipt-footer {
+  padding: 16px 28px;
+  background: #f8fafc;
+  border-top: 1px solid var(--border);
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.8;
+}
+
+/* ── ACTION BUTTONS ── */
+.actions {
+  display: flex;
+  gap: 10px;
+}
+.btn {
+  flex: 1;
+  padding: 12px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: 'IBM Plex Sans Thai', sans-serif;
+  cursor: pointer;
+  border: none;
+  transition: .2s;
+}
+.btn-primary { background: var(--navy); color: #fff; }
+.btn-primary:hover { background: #263548; }
+.btn-outline {
+  background: #fff;
+  color: var(--navy);
+  border: 1.5px solid var(--border);
+}
+.btn-outline:hover { border-color: var(--navy); }
+
+@media print {
+  nav, .actions { display: none !important; }
+  body { background: #fff; padding: 0; }
+  .wrapper { margin: 0; max-width: 100%; }
+  .receipt { border: none; border-radius: 0; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">✦ TileAI</div>
+  <button class="nav-back" onclick="history.back()">← กลับแก้ไข</button>
+</nav>
+
+<div class="wrapper">
+
+  <div class="receipt">
+
+    <!-- HEADER -->
+    <div class="receipt-header">
+      <div class="receipt-header-left">
+        <div class="brand">✦ TileAI</div>
+        <div class="sub">ใบประมาณการสั่งผลิตกระเบื้อง</div>
+      </div>
+      <div class="receipt-header-right">
+        <div class="doc-label">เลขที่</div>
+        <div class="doc-number" id="docNumber">—</div>
+        <div class="doc-date" id="docDate">—</div>
+      </div>
+    </div>
+
+    <!-- BODY -->
+    <div class="receipt-body">
+
+      <!-- TILE PREVIEW -->
+      <div class="tile-preview-row">
+        <div class="tile-img-wrap" id="tileImgWrap">🪨</div>
+        <div class="tile-meta">
+          <div class="label">ลวดลาย</div>
+          <div class="value" id="rPrompt">—</div>
+          <div class="tags" id="rTags"></div>
+        </div>
+      </div>
+
+      <hr class="divider">
+
+      <!-- COST TABLE -->
+      <table class="cost-table">
+        <tr>
+          <td>ราคาวัสดุ</td>
+          <td><span id="rMatPrice">—</span> ฿/ตร.ม.</td>
+        </tr>
+        <tr>
+          <td>พื้นที่ปู</td>
+          <td><span id="rArea">—</span> ตร.ม.</td>
+        </tr>
+        <tr>
+          <td>จำนวนแผ่น (รวม +10% ของเสีย)</td>
+          <td><span id="rTiles">—</span> แผ่น</td>
+        </tr>
+        <tr class="subtotal">
+          <td>ค่าวัสดุรวม</td>
+          <td><span id="rMatTotal">—</span> ฿</td>
+        </tr>
+        <tr>
+          <td>ค่าแรงช่างปู</td>
+          <td><span id="rLabor">—</span> ฿/ตร.ม.</td>
+        </tr>
+        <tr class="subtotal">
+          <td>ค่าแรงรวม</td>
+          <td><span id="rLaborTotal">—</span> ฿</td>
+        </tr>
+      </table>
+
+      <div class="total-row">
+        <div class="total-label">รวมทั้งหมด (ประมาณ)</div>
+        <div>
+          <span class="total-amount" id="rGrand">—</span>
+          <span class="total-unit">บาท</span>
+        </div>
+      </div>
+
+    </div><!-- end body -->
+
+    <!-- FOOTER -->
+    <div class="receipt-footer">
+      * ราคาอ้างอิงตลาดไทย ปี 2568 &nbsp;|&nbsp;
+      * รวมค่าแรงช่างปูแล้ว &nbsp;|&nbsp;
+      * ไม่รวมค่ากาวและยาแนว &nbsp;|&nbsp;
+      * ราคาอาจเปลี่ยนแปลงตามพื้นที่และสภาวะตลาด
+    </div>
+
+  </div><!-- end receipt -->
+
+  <!-- ACTIONS -->
+  <div class="actions">
+    <button class="btn btn-outline" onclick="history.back()">← แก้ไข</button>
+    <button class="btn btn-primary" onclick="window.print()">🖨 พิมพ์ใบเสร็จ</button>
+  </div>
+
+</div><!-- end wrapper -->
+
+<script>
+const config = JSON.parse(localStorage.getItem("receiptConfig"));
+if (!config) {
+  alert("ไม่พบข้อมูล");
+  window.location.href = "generator.html";
+}
+
+const fmt = n => Number(n).toLocaleString("th-TH");
+
+// Doc number: date-based
+const now = new Date();
+const docNum = "TL" + now.getFullYear().toString().slice(-2)
+  + String(now.getMonth()+1).padStart(2,"0")
+  + String(now.getDate()).padStart(2,"0")
+  + "-" + String(now.getHours()).padStart(2,"0")
+  + String(now.getMinutes()).padStart(2,"0");
+
+document.getElementById("docNumber").textContent = docNum;
+document.getElementById("docDate").textContent    = config.date || "";
+
+// Tile image
+if (config.tileUrl) {
+  const img = document.createElement("img");
+  img.src = config.tileUrl;
+  document.getElementById("tileImgWrap").innerHTML = "";
+  document.getElementById("tileImgWrap").appendChild(img);
+}
+
+// Prompt
+document.getElementById("rPrompt").textContent =
+  config.prompt || "(ไม่ระบุลวดลาย)";
+
+// Tags
+const tags = [
+  config.matName,
+  config.size + " cm",
+  config.dpi + " DPI",
+];
+document.getElementById("rTags").innerHTML =
+  tags.map(t => `<span class="tag">${t}</span>`).join("");
+
+// Numbers
+document.getElementById("rMatPrice").textContent   = fmt(config.matPrice);
+document.getElementById("rArea").textContent        = config.area;
+document.getElementById("rTiles").textContent       = fmt(config.tiles);
+document.getElementById("rMatTotal").textContent    = fmt(config.matTotal);
+document.getElementById("rLabor").textContent       = fmt(config.labor);
+document.getElementById("rLaborTotal").textContent  = fmt(config.laborTotal);
+document.getElementById("rGrand").textContent       = fmt(config.grand);
+</script>
+
+</body>
+</html>

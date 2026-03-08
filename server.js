@@ -265,6 +265,25 @@ app.delete("/tile/:id", async (req, res) => {
   }
 });
 
+/* ---------------- FACTORY CONFIG ---------------- */
+
+app.get("/factory-config", (_req, res) => {
+  res.json({
+    sizes: {
+      "30x30":  70,
+      "60x60":  120,
+      "60x120": 220,
+      "80x80":  180,
+    },
+    laborRates: {
+      ceramic: 350,
+      granito: 425,
+      marble:  1050,
+      wood:    450,
+    },
+  });
+});
+
 /* ---------------- SERVER ---------------- */
 
 const PORT = process.env.PORT || 3000;

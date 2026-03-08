@@ -1,185 +1,691 @@
 <!DOCTYPE html>
-<html>
+<html lang="th">
 <head>
 <meta charset="UTF-8">
-<title>Tile Production Configurator 3D</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TileAI — Generator</title>
 
-<link rel="stylesheet" href="styles.css">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 
-<!-- THREE + OrbitControls -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/controls/OrbitControls.js"></script>
+
+<style>
+:root {
+  --navy: #1e2a3a;
+  --navy2: #263548;
+  --blue: #3b82f6;
+  --blue2: #60a5fa;
+  --bg: #f1f5f9;
+  --surface: #ffffff;
+  --border: #e2e8f0;
+  --text: #1e293b;
+  --muted: #64748b;
+  --success: #10b981;
+  --warn: #f59e0b;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'IBM Plex Sans Thai', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ── NAV ── */
+nav {
+  background: var(--navy);
+  padding: 0 24px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.nav-logo {
+  font-size: 16px;
+  font-weight: 600;
+  color: #fff;
+  letter-spacing: .5px;
+}
+
+.nav-user {
+  font-size: 13px;
+  color: #94a3b8;
+}
+
+/* ── LAYOUT ── */
+.workspace {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* ── LEFT PANEL ── */
+.panel {
+  width: 320px;
+  flex-shrink: 0;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  padding: 20px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.section-title {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+/* ── PROMPT ── */
+.prompt-wrap textarea {
+  width: 100%;
+  resize: none;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-family: 'IBM Plex Sans Thai', sans-serif;
+  font-size: 13px;
+  color: var(--text);
+  background: #f8fafc;
+  line-height: 1.5;
+  transition: border-color .2s;
+}
+.prompt-wrap textarea:focus {
+  outline: none;
+  border-color: var(--blue);
+  background: #fff;
+}
+
+/* ── SIZE PILLS ── */
+.pill-group {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.pill {
+  padding: 6px 14px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: .15s;
+  background: #f8fafc;
+  color: var(--text);
+}
+.pill:hover { border-color: var(--blue); color: var(--blue); }
+.pill.active {
+  background: var(--navy);
+  border-color: var(--navy);
+  color: #fff;
+}
+
+/* ── MATERIAL ── */
+.mat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.mat-card {
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  cursor: pointer;
+  transition: .15s;
+  background: #f8fafc;
+}
+.mat-card:hover { border-color: var(--blue); }
+.mat-card.active {
+  border-color: var(--blue);
+  background: #eff6ff;
+}
+
+.mat-name {
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 2px;
+}
+.mat-range {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+/* ── AREA INPUT ── */
+.area-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.area-wrap input {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: 'IBM Plex Mono', monospace;
+  color: var(--text);
+  background: #f8fafc;
+  transition: border-color .2s;
+}
+.area-wrap input:focus {
+  outline: none;
+  border-color: var(--blue);
+  background: #fff;
+}
+.area-unit {
+  font-size: 13px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+/* ── DPI ── */
+select {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 13px;
+  font-family: 'IBM Plex Sans Thai', sans-serif;
+  background: #f8fafc;
+  color: var(--text);
+  cursor: pointer;
+}
+select:focus { outline: none; border-color: var(--blue); }
+
+/* ── GENERATE BTN ── */
+.btn-group { display: flex; gap: 8px; }
+
+.gen-btn {
+  flex: 1;
+  padding: 12px;
+  background: var(--navy);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: 'IBM Plex Sans Thai', sans-serif;
+  cursor: pointer;
+  transition: .2s;
+}
+.gen-btn:hover { background: var(--navy2); }
+.gen-btn:disabled { opacity: .5; cursor: not-allowed; }
+
+.upload-btn {
+  padding: 12px 14px;
+  background: #f1f5f9;
+  color: var(--navy);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  font-size: 18px;
+  cursor: pointer;
+  transition: .2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.upload-btn:hover { background: #e2e8f0; border-color: var(--navy); }
+
+/* ── GALLERY ── */
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+.gallery img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 6px;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: .15s;
+}
+.gallery img:hover { border-color: var(--blue); }
+.gallery img.selected { border-color: var(--navy); }
+
+/* ── MAIN AREA (3D + SIDEBAR) ── */
+.main {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+/* ── 3D VIEWER ── */
+#viewer {
+  flex: 1;
+  background: #0f172a;
+  position: relative;
+  overflow: hidden;
+}
+#viewer canvas {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+}
+
+.viewer-hint {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,.5);
+  color: #94a3b8;
+  font-size: 11px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+/* ── COST SIDEBAR ── */
+.cost-panel {
+  width: 240px;
+  flex-shrink: 0;
+  background: var(--surface);
+  border-left: 1px solid var(--border);
+  padding: 20px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+}
+
+.cost-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--navy);
+}
+
+.cost-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 12px;
+  color: var(--muted);
+  padding: 4px 0;
+  border-bottom: 1px dashed var(--border);
+}
+.cost-row:last-child { border-bottom: none; }
+
+.cost-row .val {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  color: var(--text);
+}
+
+.cost-total {
+  background: var(--navy);
+  border-radius: 10px;
+  padding: 14px;
+  margin-top: 4px;
+}
+.cost-total .label {
+  font-size: 11px;
+  color: #94a3b8;
+  margin-bottom: 4px;
+}
+.cost-total .amount {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 20px;
+  font-weight: 500;
+  color: #fff;
+}
+.cost-total .unit {
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+.cost-note {
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.divider {
+  border: none;
+  border-top: 1px solid var(--border);
+}
+</style>
 </head>
 
 <body>
 
-<div class="container">
+<nav>
+  <div class="nav-logo">✦ TileAI</div>
+  <div class="nav-user" id="navUser"></div>
+</nav>
 
-<h1>Tile Production Configurator 3D</h1>
-<p class="subtitle">Factory-ready tile visualization system</p>
+<div class="workspace">
 
-<div class="layout">
+  <!-- LEFT PANEL -->
+  <div class="panel">
 
-<!-- LEFT PANEL -->
-<div class="panel">
+    <!-- PROMPT -->
+    <div class="prompt-wrap">
+      <div class="section-title">ลวดลายที่ต้องการ</div>
+      <textarea id="prompt" rows="3" placeholder="เช่น white marble with gold veins, geometric blue pattern, terracotta earth tones..."></textarea>
+    </div>
 
-<label>Pattern Description</label>
-<input type="text" id="prompt" placeholder="White marble with subtle gold veins">
+    <!-- TILE SIZE -->
+    <div>
+      <div class="section-title">ขนาดกระเบื้อง</div>
+      <div class="pill-group" id="sizeGroup">
+        <div class="pill active" data-size="30x30">30×30</div>
+        <div class="pill" data-size="60x60">60×60</div>
+        <div class="pill" data-size="60x120">60×120</div>
+        <div class="pill" data-size="80x80">80×80</div>
+      </div>
+    </div>
 
-<label>Tile Size</label>
-<select id="tileSize">
-  <option value="30">30x30 cm</option>
-  <option value="60" selected>60x60 cm</option>
-  <option value="80">80x80 cm</option>
-</select>
+    <!-- MATERIAL -->
+    <div>
+      <div class="section-title">ประเภทวัสดุ</div>
+      <div class="mat-grid" id="matGroup">
+        <div class="mat-card active" data-mat="ceramic">
+          <div class="mat-name">เซรามิก</div>
+          <div class="mat-range">100–200 ฿/ตร.ม.</div>
+        </div>
+        <div class="mat-card" data-mat="granito">
+          <div class="mat-name">แกรนิตโต้</div>
+          <div class="mat-range">400–500 ฿/ตร.ม.</div>
+        </div>
+        <div class="mat-card" data-mat="marble">
+          <div class="mat-name">หินอ่อน</div>
+          <div class="mat-range">1,000–3,000 ฿/ตร.ม.</div>
+        </div>
+        <div class="mat-card" data-mat="wood">
+          <div class="mat-name">ลายไม้</div>
+          <div class="mat-range">400–800 ฿/ตร.ม.</div>
+        </div>
+      </div>
+    </div>
 
-<label>DPI</label>
-<select id="dpi">
-  <option value="150">150 DPI</option>
-  <option value="300" selected>300 DPI</option>
-  <option value="600">600 DPI</option>
-</select>
+    <!-- AREA -->
+    <div>
+      <div class="section-title">พื้นที่ปู</div>
+      <div class="area-wrap">
+        <input type="number" id="area" value="20" min="1" max="9999" step="0.5">
+        <span class="area-unit">ตร.ม.</span>
+      </div>
+    </div>
 
-<label>Zoom</label>
-<input type="range" id="zoomControl" min="0.5" max="3" step="0.1" value="1">
+    <!-- DPI -->
+    <div>
+      <div class="section-title">ความละเอียด</div>
+      <select id="dpi">
+        <option value="150">150 DPI — Draft</option>
+        <option value="300" selected>300 DPI — Standard</option>
+        <option value="600">600 DPI — Premium (+20%)</option>
+      </select>
+    </div>
 
-<button id="generateBtn">Generate Tile</button>
+    <!-- GENERATE + UPLOAD -->
+    <div class="btn-group">
+      <button class="gen-btn" id="generateBtn">Generate Tile</button>
+      <button class="upload-btn" id="uploadBtn" title="Upload รูปกระเบื้อง">📁</button>
+      <input type="file" id="tileUpload" accept="image/*" style="display:none">
+    </div>
 
-<hr>
+    <hr class="divider">
 
-<h3>Saved Designs</h3>
-<div id="gallery" class="gallery"></div>
+    <!-- GALLERY -->
+    <div>
+      <div class="section-title">Saved Designs</div>
+      <div class="gallery" id="gallery"></div>
+    </div>
 
-<hr>
+  </div><!-- end panel -->
 
-<p><strong>Price per Tile:</strong> <span id="pricePerTile">0</span> THB</p>
-<p><strong>Minimum Production (100 sqm):</strong> <span id="minTiles">0</span></p>
-<p><strong>Total Cost:</strong> <span id="totalCost">0</span> THB</p>
+  <!-- MAIN -->
+  <div class="main">
 
-</div>
+    <!-- 3D VIEWER -->
+    <div id="viewer">
+      <div class="viewer-hint">Drag to rotate · Scroll to zoom</div>
+    </div>
 
-<!-- RIGHT VIEWER -->
-<div id="viewer"></div>
+    <!-- COST SIDEBAR -->
+    <div class="cost-panel">
+      <div class="cost-title">ประมาณการค่าใช้จ่าย</div>
 
-</div>
-</div>
+      <div class="cost-row">
+        <span>ราคาวัสดุ</span>
+        <span class="val"><span id="cMatPrice">—</span> ฿/ตร.ม.</span>
+      </div>
+      <div class="cost-row">
+        <span>พื้นที่</span>
+        <span class="val"><span id="cArea">—</span> ตร.ม.</span>
+      </div>
+      <div class="cost-row">
+        <span>จำนวนแผ่น (+10%)</span>
+        <span class="val"><span id="cTiles">—</span> แผ่น</span>
+      </div>
+      <div class="cost-row">
+        <span>ค่าวัสดุรวม</span>
+        <span class="val"><span id="cMatTotal">—</span> ฿</span>
+      </div>
+
+      <hr class="divider">
+
+      <div class="cost-row">
+        <span>ค่าแรง</span>
+        <span class="val"><span id="cLabor">—</span> ฿/ตร.ม.</span>
+      </div>
+      <div class="cost-row">
+        <span>ค่าแรงรวม</span>
+        <span class="val"><span id="cLaborTotal">—</span> ฿</span>
+      </div>
+
+      <div class="cost-total">
+        <div class="label">รวมทั้งหมด (ประมาณ)</div>
+        <div class="amount" id="cGrandTotal">—</div>
+        <div class="unit">บาท</div>
+      </div>
+
+      <div class="cost-note">
+        * ราคาอ้างอิงตลาดไทย ปี 2568<br>
+        * รวมค่าแรงช่างปูแล้ว<br>
+        * ไม่รวมค่ากาวและยาแนว<br>
+        * ราคาจริงอาจแตกต่างขึ้นกับยี่ห้อ<br>
+        * ควรสอบถามราคาจากร้านค้าก่อนตัดสินใจ
+      </div>
+    </div>
+
+  </div><!-- end main -->
+
+</div><!-- end workspace -->
 
 <script src="room3d.js"></script>
 
 <script>
+/* ── AUTH ── */
+const user = JSON.parse(localStorage.getItem("user"));
+if (!user) { alert("กรุณา Login ก่อน"); window.location.href = "login.html"; }
+document.getElementById("navUser").textContent = user.email;
 
-const generateBtn = document.getElementById("generateBtn");
-generateBtn.addEventListener("click", generateTile);
+/* ── STATE ── */
+let selectedSize = "30x30";
+let selectedMat  = "ceramic";
 
+/* ── MAT PRICES (ราคากลาง ปี 2568) ── */
+const matPrices = {
+  ceramic: { "30x30": 150, "60x60": 200,  "60x120": 250,  "80x80": 220  },
+  granito: { "30x30": 400, "60x60": 450,  "60x120": 550,  "80x80": 500  },
+  marble:  { "30x30": 900, "60x60": 1200, "60x120": 1500, "80x80": 1300 },
+  wood:    { "30x30": 400, "60x60": 500,  "60x120": 600,  "80x80": 550  },
+};
+
+const laborRates = {
+  ceramic: 350,
+  granito: 425,
+  marble:  1050,
+  wood:    450,
+};
+
+const tileArea = {
+  "30x30":  0.09,
+  "60x60":  0.36,
+  "60x120": 0.72,
+  "80x80":  0.64,
+};
+
+/* ── SIZE PILLS ── */
+document.getElementById("sizeGroup").addEventListener("click", e => {
+  const pill = e.target.closest(".pill");
+  if (!pill) return;
+  document.querySelectorAll(".pill").forEach(p => p.classList.remove("active"));
+  pill.classList.add("active");
+  selectedSize = pill.dataset.size;
+  updateCost();
+  if (typeof updateZoom === "function") updateZoom();
+});
+
+/* ── MATERIAL CARDS ── */
+document.getElementById("matGroup").addEventListener("click", e => {
+  const card = e.target.closest(".mat-card");
+  if (!card) return;
+  document.querySelectorAll(".mat-card").forEach(c => c.classList.remove("active"));
+  card.classList.add("active");
+  selectedMat = card.dataset.mat;
+  updateCost();
+});
+
+/* ── AREA INPUT ── */
+document.getElementById("area").addEventListener("input", updateCost);
+
+/* ── DPI ── */
+document.getElementById("dpi").addEventListener("change", updateCost);
+
+/* ── COST CALCULATION ── */
+function updateCost() {
+  const area   = parseFloat(document.getElementById("area").value) || 0;
+  const dpi    = document.getElementById("dpi").value;
+  let matPrice = matPrices[selectedMat][selectedSize] || 0;
+
+  if (dpi === "600") matPrice = Math.round(matPrice * 1.2);
+  if (dpi === "150") matPrice = Math.round(matPrice * 0.9);
+
+  const labor     = laborRates[selectedMat];
+  const tileAm    = tileArea[selectedSize];
+  const tiles     = Math.ceil((area * 1.10) / tileAm);
+  const matTotal  = Math.round(area * matPrice);
+  const laborTotal= Math.round(area * labor);
+  const grand     = matTotal + laborTotal;
+
+  const fmt = n => n.toLocaleString("th-TH");
+
+  document.getElementById("cMatPrice").textContent  = fmt(matPrice);
+  document.getElementById("cArea").textContent       = area;
+  document.getElementById("cTiles").textContent      = fmt(tiles);
+  document.getElementById("cMatTotal").textContent   = fmt(matTotal);
+  document.getElementById("cLabor").textContent      = fmt(labor);
+  document.getElementById("cLaborTotal").textContent = fmt(laborTotal);
+  document.getElementById("cGrandTotal").textContent = fmt(grand);
+}
+
+updateCost();
+
+/* ── UPLOAD TILE (ชั่วคราว) ── */
+document.getElementById("uploadBtn").addEventListener("click", () => {
+  document.getElementById("tileUpload").click();
+});
+
+document.getElementById("tileUpload").addEventListener("change", e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const url = URL.createObjectURL(file);
+  if (typeof applyTexture === "function") applyTexture(url);
+  // เพิ่มใน gallery ชั่วคราว
+  const gallery = document.getElementById("gallery");
+  const img = document.createElement("img");
+  img.src = url;
+  img.onclick = () => {
+    document.querySelectorAll(".gallery img").forEach(i => i.classList.remove("selected"));
+    img.classList.add("selected");
+    if (typeof applyTexture === "function") applyTexture(url);
+  };
+  gallery.prepend(img);
+  // reset input
+  e.target.value = "";
+});
+
+/* ── GENERATE ── */
+document.getElementById("generateBtn").addEventListener("click", generateTile);
 window.addEventListener("DOMContentLoaded", loadSavedTiles);
 
-/* ================= LOAD SAVED TILES ================= */
-
 async function loadSavedTiles() {
-
-  const user = JSON.parse(localStorage.getItem("user"));
-
-  if (!user || !user.id) {
-    console.log("No logged in user");
-    return;
-  }
-
   try {
-
-    const res = await fetch("/tiles/" + parseInt(user.id));
-
-    if (!res.ok) {
-      console.log("Failed loading tiles");
-      return;
-    }
-
+    const res   = await fetch("/tiles/" + parseInt(user.id));
+    if (!res.ok) return;
     const tiles = await res.json();
-
     const gallery = document.getElementById("gallery");
     gallery.innerHTML = "";
-
     tiles.forEach(tile => {
-
       const img = document.createElement("img");
       img.src = tile.tile_url;
-
       img.onclick = () => {
-        if (typeof applyTexture === "function") {
-          applyTexture(tile.tile_url);
-        }
+        document.querySelectorAll(".gallery img").forEach(i => i.classList.remove("selected"));
+        img.classList.add("selected");
+        if (typeof applyTexture === "function") applyTexture(tile.tile_url);
       };
-
       gallery.appendChild(img);
     });
-
   } catch (err) {
     console.log("Load tiles error:", err);
   }
 }
 
-/* ================= GENERATE ================= */
-
 async function generateTile() {
+  const prompt  = document.getElementById("prompt").value.trim();
+  const dpi     = document.getElementById("dpi").value;
+  const btn     = document.getElementById("generateBtn");
 
-  const prompt = document.getElementById("prompt").value.trim();
-  const tileSize = document.getElementById("tileSize").value;
-  const dpi = document.getElementById("dpi").value;
+  if (!prompt) { alert("กรุณาใส่ลวดลายที่ต้องการ"); return; }
 
-  const user = JSON.parse(localStorage.getItem("user"));
-
-  if (!user || !user.id) {
-    alert("Please login first");
-    return;
-  }
-
-  if (!prompt) {
-    alert("Enter pattern description");
-    return;
-  }
-
-  generateBtn.disabled = true;
-  generateBtn.innerText = "Generating...";
+  btn.disabled  = true;
+  btn.textContent = "Generating...";
 
   try {
-
-    const bodyData = {
-      prompt: prompt,
-      userId: parseInt(user.id),
-      tileSize: tileSize || null,
-      dpi: dpi ? parseInt(dpi) : null
-    };
-
-    console.log("Sending to backend:", bodyData);
-
     const res = await fetch("/generate-tile", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(bodyData)
+      body: JSON.stringify({
+        prompt,
+        userId:   parseInt(user.id),
+        tileSize: selectedSize,
+        dpi:      parseInt(dpi),
+      }),
     });
 
-    if (!res.ok) {
-      const errText = await res.text();
-      alert("Generation failed: " + errText);
-      return;
-    }
+    if (!res.ok) { alert("Generation failed: " + await res.text()); return; }
 
     const data = await res.json();
-
-    if (typeof applyTexture === "function") {
-      applyTexture(data.tileUrl);
-    }
-
+    if (typeof applyTexture === "function") applyTexture(data.tileUrl);
     loadSavedTiles();
 
   } catch (err) {
-    console.log("Generate error:", err);
-    alert("Server error during generation");
+    console.error(err);
+    alert("Server error");
   } finally {
-    generateBtn.disabled = false;
-    generateBtn.innerText = "Generate Tile";
+    btn.disabled    = false;
+    btn.textContent = "Generate Tile";
   }
 }
-
 </script>
 
 </body>
