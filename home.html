@@ -1,180 +1,184 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="th">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Home - TileAI</title>
-
+<title>TileAI</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-    body {
-        margin: 0;
-        font-family: Arial, sans-serif;
-    }
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
-    .navbar {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 15px 40px;
-        background: #f5f5f5;
-    }
+body {
+  font-family: 'IBM Plex Sans Thai', sans-serif;
+  background: #0f1a27;
+  color: #fff;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
 
-    .logo {
-        font-size: 22px;
-        font-weight: bold;
-        color: #0a3c80;
-    }
+nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 40px;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+}
 
-    .menu {
-        display: flex;
-        align-items: center;
-        gap: 20px;
-    }
+.logo { font-size: 16px; font-weight: 600; }
+.logo span { color: #60a5fa; }
 
-    .menu span {
-        color: #333;
-        font-size: 14px;
-    }
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
 
-    .menu a {
-        text-decoration: none;
-        color: #0a3c80;
-        font-weight: 500;
-        cursor: pointer;
-    }
+.user-email {
+  font-size: 13px;
+  color: #475569;
+  font-family: 'IBM Plex Mono', monospace;
+}
 
-    .menu a:hover {
-        text-decoration: underline;
-    }
+.logout-btn {
+  font-size: 13px;
+  color: #475569;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  transition: color .15s;
+}
+.logout-btn:hover { color: #f87171; }
 
-    .hero {
-        height: 80vh;
-        background-image: url('https://images.unsplash.com/photo-1505691938895-1758d7feb511');
-        background-size: cover;
-        background-position: center;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        text-align: center;
-        color: #083b77;
-    }
+main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 40px;
+  gap: 48px;
+}
 
-    .hero-content {
-        background: rgba(255,255,255,0.9);
-        padding: 40px;
-        border-radius: 15px;
-        max-width: 500px;
-    }
+.headline { text-align: center; }
 
-    .hero h1 {
-        font-size: 36px;
-        margin-bottom: 20px;
-    }
+.headline h1 {
+  font-size: 32px;
+  font-weight: 600;
+  color: #e2e8f0;
+  margin-bottom: 10px;
+  line-height: 1.3;
+}
 
-    .hero p {
-        font-size: 18px;
-        margin-bottom: 30px;
-    }
+.headline p {
+  font-size: 15px;
+  color: #475569;
+}
 
-    .hero button {
-        padding: 15px 40px;
-        font-size: 18px;
-        border-radius: 30px;
-        border: none;
-        background: #1f4f8b;
-        color: white;
-        cursor: pointer;
-    }
+.cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  max-width: 720px;
+  width: 100%;
+}
 
-    .hero button:hover {
-        background: #2c6bb2;
-    }
+.card {
+  background: rgba(255,255,255,.03);
+  border: 1px solid rgba(255,255,255,.07);
+  border-radius: 14px;
+  padding: 28px 24px;
+  transition: border-color .2s;
+}
 
-    .steps {
-        background: #f0f0f0;
-        padding: 40px;
-        text-align: center;
-    }
+.card:hover { border-color: rgba(96,165,250,.25); }
 
-    .steps-container {
-        display: flex;
-        justify-content: center;
-        gap: 50px;
-        flex-wrap: wrap;
-    }
+.card-icon { font-size: 22px; margin-bottom: 14px; }
 
-    .step {
-        font-size: 20px;
-        color: #0a3c80;
-    }
+.card-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #cbd5e1;
+  margin-bottom: 8px;
+}
 
+.card-desc {
+  font-size: 13px;
+  color: #475569;
+  line-height: 1.6;
+}
+
+.cta-btn {
+  padding: 14px 36px;
+  background: #3b82f6;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background .15s;
+}
+.cta-btn:hover { background: #2563eb; }
+
+@media (max-width: 600px) {
+  nav { padding: 16px 20px; }
+  main { padding: 40px 20px; }
+  .cards { grid-template-columns: 1fr; }
+  .headline h1 { font-size: 24px; }
+}
 </style>
 </head>
-
 <body>
 
-<div class="navbar">
-    <div class="logo">✨ TileAI</div>
-    <div class="menu">
-        <span id="welcomeText"></span>
-        <a onclick="goHome()">Home</a>
-        <a onclick="logout()">Logout</a>
-    </div>
-</div>
+<nav>
+  <div class="logo">✦ Tile<span>AI</span></div>
+  <div class="nav-right">
+    <span class="user-email" id="navEmail"></span>
+    <button class="logout-btn" onclick="logout()">ออกจากระบบ</button>
+  </div>
+</nav>
 
-<div class="hero">
-    <div class="hero-content">
-        <h1>Design Your Dream Space with AI</h1>
-        <p>Create stunning interiors with intelligent tile design.</p>
-        <button onclick="startDesign()">Start Designing</button>
-    </div>
-</div>
+<main>
+  <div class="headline">
+    <h1>ออกแบบกระเบื้องด้วย AI</h1>
+    <p>พิมพ์ลวดลาย เลือกวัสดุ รับใบเสนอราคาได้เลย</p>
+  </div>
 
-<div class="steps">
-    <div class="steps-container">
-        <div class="step">⬆ Upload</div>
-        <div class="step">💡 Type Idea</div>
-        <div class="step">🖼 Visualize</div>
+  <div class="cards">
+    <div class="card">
+      <div class="card-icon">✦</div>
+      <div class="card-title">AI Generate</div>
+      <div class="card-desc">สร้างลวดลายกระเบื้องจาก prompt ภาษาไทยหรืออังกฤษ</div>
     </div>
-</div>
+    <div class="card">
+      <div class="card-icon">⬜</div>
+      <div class="card-title">3D Preview</div>
+      <div class="card-desc">จำลองกระเบื้องบนผนังหรือพื้นในโมเดล 3D แบบ real-time</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">฿</div>
+      <div class="card-title">ใบเสนอราคา</div>
+      <div class="card-desc">คำนวณค่าวัสดุ + ค่าแรง พร้อม export PDF</div>
+    </div>
+  </div>
+
+  <button class="cta-btn" onclick="window.location.href='generator.html'">
+    เริ่มออกแบบเลย →
+  </button>
+</main>
 
 <script>
+  const user = JSON.parse(localStorage.getItem("user"));
+  if (!user) window.location.href = "login.html";
+  document.getElementById("navEmail").textContent = user.email;
 
-    // 🔐 ตรวจสอบ login แบบถูกต้อง
-    const userData = localStorage.getItem("user");
-
-    if (!userData) {
-        alert("กรุณา Login ก่อน");
-        window.location.href = "login.html";
-    } else {
-        try {
-            const user = JSON.parse(userData);
-
-            // แสดง email ด้านบน
-            document.getElementById("welcomeText").innerText =
-                "Welcome, " + user.email;
-
-        } catch (error) {
-            // ถ้า JSON พัง ล้างข้อมูลทิ้ง
-            localStorage.removeItem("user");
-            window.location.href = "login.html";
-        }
-    }
-
-    function logout() {
-        localStorage.removeItem("user");
-        window.location.href = "login.html";
-    }
-
-    function startDesign() {
-        window.location.href = "generator.html";
-    }
-
-    function goHome() {
-        window.location.href = "home.html";
-    }
-
+  function logout() {
+    localStorage.removeItem("user");
+    window.location.href = "login.html";
+  }
 </script>
-
 </body>
 </html>

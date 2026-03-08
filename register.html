@@ -1,37 +1,535 @@
 <!DOCTYPE html>
-<html>
+<html lang="th">
 <head>
-  <title>Register</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TileAI — สมัครสมาชิก</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy:    #1e2a3a;
+  --navy2:   #263548;
+  --navy3:   #0f1a27;
+  --blue:    #3b82f6;
+  --blue2:   #60a5fa;
+  --success: #10b981;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'IBM Plex Sans Thai', sans-serif;
+  background: var(--navy3);
+  color: #fff;
+  min-height: 100vh;
+  display: flex;
+  overflow: hidden;
+}
+
+/* ── GRID BG ── */
+.bg {
+  position: fixed;
+  inset: 0;
+  background:
+    linear-gradient(rgba(59,130,246,.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(59,130,246,.04) 1px, transparent 1px);
+  background-size: 48px 48px;
+  z-index: 0;
+}
+
+.bg::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(ellipse 80% 60% at 30% 50%, rgba(16,185,129,.08) 0%, transparent 70%);
+  z-index: 0;
+}
+
+/* ── SPLIT LAYOUT ── */
+.left {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 64px;
+  position: relative;
+  z-index: 1;
+}
+
+.right {
+  width: 480px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  position: relative;
+  z-index: 1;
+}
+
+/* ── BRAND ── */
+.brand-mark {
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--blue2);
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand-mark::before {
+  content: '';
+  display: inline-block;
+  width: 24px;
+  height: 1px;
+  background: var(--blue2);
+}
+
+.brand h1 {
+  font-size: 52px;
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -1px;
+  color: #fff;
+  margin-bottom: 16px;
+}
+
+.brand h1 span { color: #34d399; }
+
+.brand p {
+  font-size: 16px;
+  color: #94a3b8;
+  line-height: 1.6;
+  max-width: 360px;
+  margin-bottom: 48px;
+}
+
+/* ── STEPS ── */
+.steps {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.step {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  opacity: 0;
+  transform: translateX(-16px);
+  animation: slideIn .5s ease forwards;
+  padding-bottom: 20px;
+  position: relative;
+}
+
+.step:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  left: 15px;
+  top: 32px;
+  bottom: 0;
+  width: 1px;
+  background: rgba(59,130,246,.15);
+}
+
+.step:nth-child(1) { animation-delay: .15s; }
+.step:nth-child(2) { animation-delay: .3s; }
+.step:nth-child(3) { animation-delay: .45s; }
+
+@keyframes slideIn {
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.step-num {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(59,130,246,.12);
+  border: 1px solid rgba(59,130,246,.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  color: var(--blue2);
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.step-body strong {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: #cbd5e1;
+  margin-bottom: 2px;
+  padding-top: 5px;
+}
+
+.step-body span {
+  font-size: 12px;
+  color: #475569;
+}
+
+/* ── DIVIDER ── */
+.split-divider {
+  width: 1px;
+  background: rgba(255,255,255,.07);
+  align-self: stretch;
+  position: relative;
+  z-index: 1;
+}
+
+/* ── CARD ── */
+.card {
+  width: 100%;
+  max-width: 380px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 20px;
+  padding: 40px 36px;
+  backdrop-filter: blur(20px);
+  opacity: 0;
+  transform: translateY(20px);
+  animation: cardIn .6s ease .1s forwards;
+}
+
+@keyframes cardIn {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.card-title {
+  font-size: 22px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 6px;
+}
+
+.card-sub {
+  font-size: 13px;
+  color: #64748b;
+  margin-bottom: 32px;
+}
+
+/* ── FORM ── */
+.field {
+  margin-bottom: 18px;
+  position: relative;
+}
+
+.field label {
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: .5px;
+  text-transform: uppercase;
+  color: #64748b;
+  margin-bottom: 8px;
+}
+
+.field input {
+  width: 100%;
+  padding: 12px 14px;
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 10px;
+  font-size: 14px;
+  font-family: 'IBM Plex Sans Thai', sans-serif;
+  color: #fff;
+  transition: border-color .2s, background .2s;
+  outline: none;
+}
+
+.field input::placeholder { color: #475569; }
+
+.field input:focus {
+  border-color: var(--blue);
+  background: rgba(59,130,246,.07);
+}
+
+.field input.valid {
+  border-color: var(--success);
+  background: rgba(16,185,129,.05);
+}
+
+/* password strength */
+.strength-bar {
+  height: 3px;
+  border-radius: 2px;
+  background: rgba(255,255,255,.08);
+  margin-top: 8px;
+  overflow: hidden;
+}
+
+.strength-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width .3s, background .3s;
+  width: 0%;
+}
+
+.strength-label {
+  font-size: 11px;
+  color: #475569;
+  margin-top: 4px;
+}
+
+/* ── SUBMIT ── */
+.submit-btn {
+  width: 100%;
+  padding: 13px;
+  background: var(--blue);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: 'IBM Plex Sans Thai', sans-serif;
+  cursor: pointer;
+  transition: background .2s, transform .15s;
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.submit-btn:hover  { background: #2563eb; }
+.submit-btn:active { transform: scale(.98); }
+.submit-btn:disabled { opacity: .5; cursor: not-allowed; }
+
+/* ── MESSAGES ── */
+.error-msg {
+  font-size: 12px;
+  color: #f87171;
+  margin-top: 12px;
+  min-height: 18px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.error-msg:not(:empty)::before { content: '⚠ '; }
+
+.success-msg {
+  font-size: 13px;
+  color: #34d399;
+  margin-top: 12px;
+  display: none;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ── FOOTER ── */
+.card-footer {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255,255,255,.07);
+  text-align: center;
+  font-size: 13px;
+  color: #475569;
+}
+
+.card-footer a {
+  color: var(--blue2);
+  cursor: pointer;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color .15s;
+}
+
+.card-footer a:hover { color: #fff; }
+
+/* ── SPINNER ── */
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255,255,255,.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin .6s linear infinite;
+  display: none;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+  .left { display: none; }
+  .split-divider { display: none; }
+  .right { width: 100%; padding: 24px; }
+}
+</style>
 </head>
 <body>
 
-<h2>สมัครสมาชิก</h2>
+<div class="bg"></div>
 
-<input type="email" id="email" placeholder="Email">
-<input type="password" id="password" placeholder="Password">
-<button onclick="register()">Register</button>
+<!-- LEFT SIDE -->
+<div class="left">
+  <div class="brand">
+    <div class="brand-mark">TileAI Platform</div>
+    <h1>เริ่มต้น<br><span>ฟรี</span><br>วันนี้</h1>
+    <p>สร้างบัญชีและเริ่มออกแบบกระเบื้องด้วย AI ได้ทันที ไม่ต้องติดตั้งอะไรเพิ่ม</p>
+  </div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">01</div>
+      <div class="step-body">
+        <strong>สร้างบัญชี</strong>
+        <span>กรอกอีเมลและรหัสผ่านเพื่อเริ่มต้น</span>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">02</div>
+      <div class="step-body">
+        <strong>พิมพ์ลวดลายที่ต้องการ</strong>
+        <span>บอก AI ว่าอยากได้กระเบื้องแบบไหน</span>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">03</div>
+      <div class="step-body">
+        <strong>รับใบเสร็จราคาจริง</strong>
+        <span>คำนวณค่าใช้จ่ายอัตโนมัติ พร้อมพิมพ์ได้เลย</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="split-divider"></div>
+
+<!-- RIGHT SIDE -->
+<div class="right">
+  <div class="card">
+    <div class="card-title">สร้างบัญชีใหม่</div>
+    <div class="card-sub">ใช้เวลาไม่ถึง 1 นาที</div>
+
+    <form id="regForm" autocomplete="off">
+      <div class="field">
+        <label>อีเมล</label>
+        <input type="email" id="email" placeholder="your@email.com" required autocomplete="email">
+      </div>
+      <div class="field">
+        <label>รหัสผ่าน</label>
+        <input type="password" id="password" placeholder="อย่างน้อย 8 ตัวอักษร" required autocomplete="new-password">
+        <div class="strength-bar"><div class="strength-fill" id="strengthFill"></div></div>
+        <div class="strength-label" id="strengthLabel"></div>
+      </div>
+      <div class="field">
+        <label>ยืนยันรหัสผ่าน</label>
+        <input type="password" id="confirm" placeholder="••••••••" required autocomplete="new-password">
+      </div>
+
+      <button type="submit" class="submit-btn" id="regBtn">
+        <span id="btnText">สมัครสมาชิก</span>
+        <div class="spinner" id="spinner"></div>
+      </button>
+    </form>
+
+    <div class="error-msg"   id="errorMsg"></div>
+    <div class="success-msg" id="successMsg">✓ สมัครสำเร็จ! กำลังพาไปหน้า Login…</div>
+
+    <div class="card-footer">
+      มีบัญชีแล้ว? <a onclick="window.location.href='login.html'">เข้าสู่ระบบ</a>
+    </div>
+  </div>
+</div>
 
 <script>
-async function register() {
-  const email = document.getElementById("email").value;
+/* ── PASSWORD STRENGTH ── */
+document.getElementById("password").addEventListener("input", e => {
+  const val  = e.target.value;
+  const fill = document.getElementById("strengthFill");
+  const lbl  = document.getElementById("strengthLabel");
+
+  let score = 0;
+  if (val.length >= 8)          score++;
+  if (/[A-Z]/.test(val))        score++;
+  if (/[0-9]/.test(val))        score++;
+  if (/[^A-Za-z0-9]/.test(val)) score++;
+
+  const map = [
+    { w: "0%",   c: "transparent",  t: "" },
+    { w: "25%",  c: "#ef4444",      t: "อ่อนมาก" },
+    { w: "50%",  c: "#f59e0b",      t: "พอใช้" },
+    { w: "75%",  c: "#3b82f6",      t: "ดี" },
+    { w: "100%", c: "#10b981",      t: "แข็งแกร่ง" },
+  ];
+
+  fill.style.width      = map[score].w;
+  fill.style.background = map[score].c;
+  lbl.textContent       = map[score].t;
+  lbl.style.color       = map[score].c;
+});
+
+/* ── CONFIRM MATCH ── */
+document.getElementById("confirm").addEventListener("input", e => {
+  const pw  = document.getElementById("password").value;
+  const val = e.target.value;
+  e.target.classList.toggle("valid", val === pw && val.length > 0);
+});
+
+/* ── REGISTER ── */
+document.getElementById("regForm").addEventListener("submit", async e => {
+  e.preventDefault();
+
+  const btn     = document.getElementById("regBtn");
+  const btnText = document.getElementById("btnText");
+  const spinner = document.getElementById("spinner");
+  const errMsg  = document.getElementById("errorMsg");
+  const sucMsg  = document.getElementById("successMsg");
+
+  errMsg.textContent    = "";
+  sucMsg.style.display  = "none";
+
+  const email   = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value;
+  const confirm  = document.getElementById("confirm").value;
 
-  const response = await fetch("http://localhost:3000/register", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password })
-  });
-
-  const data = await response.text();
-
-  if (response.ok) {
-    alert("สมัครสำเร็จ!");
-    window.location.href = "login.html";
-  } else {
-    alert(data);
+  if (password.length < 8) {
+    errMsg.textContent = "รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร";
+    return;
   }
-}
-</script>
 
+  if (password !== confirm) {
+    errMsg.textContent = "รหัสผ่านไม่ตรงกัน";
+    return;
+  }
+
+  btn.disabled          = true;
+  btnText.textContent   = "กำลังสมัคร…";
+  spinner.style.display = "block";
+
+  try {
+    const res  = await fetch("/register", {
+      method:  "POST",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify({ email, password }),
+    });
+
+    const data = await res.text();
+
+    if (!res.ok) {
+      errMsg.textContent = data || "สมัครไม่สำเร็จ";
+      return;
+    }
+
+    sucMsg.style.display = "flex";
+    setTimeout(() => window.location.href = "login.html", 1800);
+
+  } catch {
+    errMsg.textContent = "ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้";
+  } finally {
+    btn.disabled          = false;
+    btnText.textContent   = "สมัครสมาชิก";
+    spinner.style.display = "none";
+  }
+});
+</script>
 </body>
 </html>
