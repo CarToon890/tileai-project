@@ -37,7 +37,6 @@ body {
   overflow: hidden;
 }
 
-/* ── NAV ── */
 nav {
   background: var(--navy);
   padding: 0 24px;
@@ -47,27 +46,11 @@ nav {
   justify-content: space-between;
   flex-shrink: 0;
 }
+.nav-logo { font-size: 16px; font-weight: 600; color: #fff; letter-spacing: .5px; }
+.nav-user { font-size: 13px; color: #94a3b8; }
 
-.nav-logo {
-  font-size: 16px;
-  font-weight: 600;
-  color: #fff;
-  letter-spacing: .5px;
-}
+.workspace { display: flex; flex: 1; overflow: hidden; }
 
-.nav-user {
-  font-size: 13px;
-  color: #94a3b8;
-}
-
-/* ── LAYOUT ── */
-.workspace {
-  display: flex;
-  flex: 1;
-  overflow: hidden;
-}
-
-/* ── LEFT PANEL ── */
 .panel {
   width: 320px;
   flex-shrink: 0;
@@ -89,7 +72,6 @@ nav {
   margin-bottom: 8px;
 }
 
-/* ── PROMPT ── */
 .prompt-wrap textarea {
   width: 100%;
   resize: none;
@@ -103,19 +85,9 @@ nav {
   line-height: 1.5;
   transition: border-color .2s;
 }
-.prompt-wrap textarea:focus {
-  outline: none;
-  border-color: var(--blue);
-  background: #fff;
-}
+.prompt-wrap textarea:focus { outline: none; border-color: var(--blue); background: #fff; }
 
-/* ── SIZE PILLS ── */
-.pill-group {
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
-}
-
+.pill-group { display: flex; gap: 6px; flex-wrap: wrap; }
 .pill {
   padding: 6px 14px;
   border: 1px solid var(--border);
@@ -127,19 +99,9 @@ nav {
   color: var(--text);
 }
 .pill:hover { border-color: var(--blue); color: var(--blue); }
-.pill.active {
-  background: var(--navy);
-  border-color: var(--navy);
-  color: #fff;
-}
+.pill.active { background: var(--navy); border-color: var(--navy); color: #fff; }
 
-/* ── MATERIAL ── */
-.mat-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-}
-
+.mat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .mat-card {
   border: 1.5px solid var(--border);
   border-radius: 10px;
@@ -149,27 +111,11 @@ nav {
   background: #f8fafc;
 }
 .mat-card:hover { border-color: var(--blue); }
-.mat-card.active {
-  border-color: var(--blue);
-  background: #eff6ff;
-}
+.mat-card.active { border-color: var(--blue); background: #eff6ff; }
+.mat-name { font-size: 13px; font-weight: 500; margin-bottom: 2px; }
+.mat-range { font-size: 11px; color: var(--muted); }
 
-.mat-name {
-  font-size: 13px;
-  font-weight: 500;
-  margin-bottom: 2px;
-}
-.mat-range {
-  font-size: 11px;
-  color: var(--muted);
-}
-
-/* ── AREA INPUT ── */
-.area-wrap {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
+.area-wrap { display: flex; align-items: center; gap: 8px; }
 .area-wrap input {
   flex: 1;
   padding: 8px 12px;
@@ -181,18 +127,9 @@ nav {
   background: #f8fafc;
   transition: border-color .2s;
 }
-.area-wrap input:focus {
-  outline: none;
-  border-color: var(--blue);
-  background: #fff;
-}
-.area-unit {
-  font-size: 13px;
-  color: var(--muted);
-  white-space: nowrap;
-}
+.area-wrap input:focus { outline: none; border-color: var(--blue); background: #fff; }
+.area-unit { font-size: 13px; color: var(--muted); white-space: nowrap; }
 
-/* ── DPI ── */
 select {
   width: 100%;
   padding: 8px 12px;
@@ -206,9 +143,7 @@ select {
 }
 select:focus { outline: none; border-color: var(--blue); }
 
-/* ── GENERATE BTN ── */
 .btn-group { display: flex; gap: 8px; }
-
 .gen-btn {
   flex: 1;
   padding: 12px;
@@ -240,12 +175,7 @@ select:focus { outline: none; border-color: var(--blue); }
 }
 .upload-btn:hover { background: #e2e8f0; border-color: var(--navy); }
 
-/* ── GALLERY ── */
-.gallery {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 6px;
-}
+.gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
 .gallery img {
   width: 100%;
   aspect-ratio: 1;
@@ -258,26 +188,10 @@ select:focus { outline: none; border-color: var(--blue); }
 .gallery img:hover { border-color: var(--blue); }
 .gallery img.selected { border-color: var(--navy); }
 
-/* ── MAIN AREA (3D + SIDEBAR) ── */
-.main {
-  flex: 1;
-  display: flex;
-  overflow: hidden;
-}
+.main { flex: 1; display: flex; overflow: hidden; }
 
-/* ── 3D VIEWER ── */
-#viewer {
-  flex: 1;
-  background: #0f172a;
-  position: relative;
-  overflow: hidden;
-}
-#viewer canvas {
-  width: 100% !important;
-  height: 100% !important;
-  display: block;
-}
-
+#viewer { flex: 1; background: #0f172a; position: relative; overflow: hidden; }
+#viewer canvas { width: 100% !important; height: 100% !important; display: block; }
 .viewer-hint {
   position: absolute;
   bottom: 16px;
@@ -292,7 +206,6 @@ select:focus { outline: none; border-color: var(--blue); }
   white-space: nowrap;
 }
 
-/* ── COST SIDEBAR ── */
 .cost-panel {
   width: 240px;
   flex-shrink: 0;
@@ -304,13 +217,7 @@ select:focus { outline: none; border-color: var(--blue); }
   gap: 12px;
   overflow-y: auto;
 }
-
-.cost-title {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--navy);
-}
-
+.cost-title { font-size: 13px; font-weight: 600; color: var(--navy); }
 .cost-row {
   display: flex;
   justify-content: space-between;
@@ -320,46 +227,29 @@ select:focus { outline: none; border-color: var(--blue); }
   padding: 4px 0;
   border-bottom: 1px dashed var(--border);
 }
-.cost-row:last-child { border-bottom: none; }
+.cost-row .val { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--text); }
+.cost-total { background: var(--navy); border-radius: 10px; padding: 14px; margin-top: 4px; }
+.cost-total .label { font-size: 11px; color: #94a3b8; margin-bottom: 4px; }
+.cost-total .amount { font-family: 'IBM Plex Mono', monospace; font-size: 20px; font-weight: 500; color: #fff; }
+.cost-total .unit { font-size: 11px; color: #94a3b8; }
+.cost-note { font-size: 11px; color: var(--muted); line-height: 1.5; }
 
-.cost-row .val {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 12px;
-  color: var(--text);
-}
-
-.cost-total {
-  background: var(--navy);
-  border-radius: 10px;
-  padding: 14px;
-  margin-top: 4px;
-}
-.cost-total .label {
-  font-size: 11px;
-  color: #94a3b8;
-  margin-bottom: 4px;
-}
-.cost-total .amount {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 20px;
-  font-weight: 500;
+.receipt-btn {
+  width: 100%;
+  padding: 11px;
+  background: var(--blue);
   color: #fff;
-}
-.cost-total .unit {
-  font-size: 11px;
-  color: #94a3b8;
-}
-
-.cost-note {
-  font-size: 11px;
-  color: var(--muted);
-  line-height: 1.5;
-}
-
-.divider {
   border: none;
-  border-top: 1px solid var(--border);
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: 'IBM Plex Sans Thai', sans-serif;
+  cursor: pointer;
+  transition: .2s;
 }
+.receipt-btn:hover { background: #2563eb; }
+
+.divider { border: none; border-top: 1px solid var(--border); }
 </style>
 </head>
 
@@ -372,16 +262,12 @@ select:focus { outline: none; border-color: var(--blue); }
 
 <div class="workspace">
 
-  <!-- LEFT PANEL -->
   <div class="panel">
-
-    <!-- PROMPT -->
     <div class="prompt-wrap">
       <div class="section-title">ลวดลายที่ต้องการ</div>
       <textarea id="prompt" rows="3" placeholder="เช่น white marble with gold veins, geometric blue pattern, terracotta earth tones..."></textarea>
     </div>
 
-    <!-- TILE SIZE -->
     <div>
       <div class="section-title">ขนาดกระเบื้อง</div>
       <div class="pill-group" id="sizeGroup">
@@ -392,7 +278,6 @@ select:focus { outline: none; border-color: var(--blue); }
       </div>
     </div>
 
-    <!-- MATERIAL -->
     <div>
       <div class="section-title">ประเภทวัสดุ</div>
       <div class="mat-grid" id="matGroup">
@@ -415,7 +300,6 @@ select:focus { outline: none; border-color: var(--blue); }
       </div>
     </div>
 
-    <!-- AREA -->
     <div>
       <div class="section-title">พื้นที่ปู</div>
       <div class="area-wrap">
@@ -424,7 +308,6 @@ select:focus { outline: none; border-color: var(--blue); }
       </div>
     </div>
 
-    <!-- DPI -->
     <div>
       <div class="section-title">ความละเอียด</div>
       <select id="dpi">
@@ -434,7 +317,6 @@ select:focus { outline: none; border-color: var(--blue); }
       </select>
     </div>
 
-    <!-- GENERATE + UPLOAD -->
     <div class="btn-group">
       <button class="gen-btn" id="generateBtn">Generate Tile</button>
       <button class="upload-btn" id="uploadBtn" title="Upload รูปกระเบื้อง">📁</button>
@@ -443,72 +325,41 @@ select:focus { outline: none; border-color: var(--blue); }
 
     <hr class="divider">
 
-    <!-- GALLERY -->
     <div>
       <div class="section-title">Saved Designs</div>
       <div class="gallery" id="gallery"></div>
     </div>
+  </div>
 
-  </div><!-- end panel -->
-
-  <!-- MAIN -->
   <div class="main">
-
-    <!-- 3D VIEWER -->
     <div id="viewer">
       <div class="viewer-hint">Drag to rotate · Scroll to zoom</div>
     </div>
 
-    <!-- COST SIDEBAR -->
     <div class="cost-panel">
       <div class="cost-title">ประมาณการค่าใช้จ่าย</div>
-
-      <div class="cost-row">
-        <span>ราคาวัสดุ</span>
-        <span class="val"><span id="cMatPrice">—</span> ฿/ตร.ม.</span>
-      </div>
-      <div class="cost-row">
-        <span>พื้นที่</span>
-        <span class="val"><span id="cArea">—</span> ตร.ม.</span>
-      </div>
-      <div class="cost-row">
-        <span>จำนวนแผ่น (+10%)</span>
-        <span class="val"><span id="cTiles">—</span> แผ่น</span>
-      </div>
-      <div class="cost-row">
-        <span>ค่าวัสดุรวม</span>
-        <span class="val"><span id="cMatTotal">—</span> ฿</span>
-      </div>
-
+      <div class="cost-row"><span>ราคาวัสดุ</span><span class="val"><span id="cMatPrice">—</span> ฿/ตร.ม.</span></div>
+      <div class="cost-row"><span>พื้นที่</span><span class="val"><span id="cArea">—</span> ตร.ม.</span></div>
+      <div class="cost-row"><span>จำนวนแผ่น (+10%)</span><span class="val"><span id="cTiles">—</span> แผ่น</span></div>
+      <div class="cost-row"><span>ค่าวัสดุรวม</span><span class="val"><span id="cMatTotal">—</span> ฿</span></div>
       <hr class="divider">
-
-      <div class="cost-row">
-        <span>ค่าแรง</span>
-        <span class="val"><span id="cLabor">—</span> ฿/ตร.ม.</span>
-      </div>
-      <div class="cost-row">
-        <span>ค่าแรงรวม</span>
-        <span class="val"><span id="cLaborTotal">—</span> ฿</span>
-      </div>
-
+      <div class="cost-row"><span>ค่าแรง</span><span class="val"><span id="cLabor">—</span> ฿/ตร.ม.</span></div>
+      <div class="cost-row"><span>ค่าแรงรวม</span><span class="val"><span id="cLaborTotal">—</span> ฿</span></div>
       <div class="cost-total">
         <div class="label">รวมทั้งหมด (ประมาณ)</div>
         <div class="amount" id="cGrandTotal">—</div>
         <div class="unit">บาท</div>
       </div>
-
       <div class="cost-note">
         * ราคาอ้างอิงตลาดไทย ปี 2568<br>
         * รวมค่าแรงช่างปูแล้ว<br>
-        * ไม่รวมค่ากาวและยาแนว<br>
-        * ราคาจริงอาจแตกต่างขึ้นกับยี่ห้อ<br>
-        * ควรสอบถามราคาจากร้านค้าก่อนตัดสินใจ
+        * ไม่รวมค่ากาวและยาแนว
       </div>
+      <button class="receipt-btn" id="receiptBtn">ออกใบเสร็จ →</button>
     </div>
+  </div>
 
-  </div><!-- end main -->
-
-</div><!-- end workspace -->
+</div>
 
 <script src="room3d.js"></script>
 
@@ -519,30 +370,19 @@ if (!user) { alert("กรุณา Login ก่อน"); window.location.href =
 document.getElementById("navUser").textContent = user.email;
 
 /* ── STATE ── */
-let selectedSize = "30x30";
-let selectedMat  = "ceramic";
+let selectedSize   = "30x30";
+let selectedMat    = "ceramic";
+let currentTileUrl = null;
 
-/* ── MAT PRICES (ราคากลาง ปี 2568) ── */
+/* ── PRICES ── */
 const matPrices = {
   ceramic: { "30x30": 150, "60x60": 200,  "60x120": 250,  "80x80": 220  },
   granito: { "30x30": 400, "60x60": 450,  "60x120": 550,  "80x80": 500  },
   marble:  { "30x30": 900, "60x60": 1200, "60x120": 1500, "80x80": 1300 },
   wood:    { "30x30": 400, "60x60": 500,  "60x120": 600,  "80x80": 550  },
 };
-
-const laborRates = {
-  ceramic: 350,
-  granito: 425,
-  marble:  1050,
-  wood:    450,
-};
-
-const tileArea = {
-  "30x30":  0.09,
-  "60x60":  0.36,
-  "60x120": 0.72,
-  "80x80":  0.64,
-};
+const laborRates = { ceramic: 350, granito: 425, marble: 1050, wood: 450 };
+const tileArea   = { "30x30": 0.09, "60x60": 0.36, "60x120": 0.72, "80x80": 0.64 };
 
 /* ── SIZE PILLS ── */
 document.getElementById("sizeGroup").addEventListener("click", e => {
@@ -565,29 +405,24 @@ document.getElementById("matGroup").addEventListener("click", e => {
   updateCost();
 });
 
-/* ── AREA INPUT ── */
+/* ── AREA / DPI ── */
 document.getElementById("area").addEventListener("input", updateCost);
-
-/* ── DPI ── */
 document.getElementById("dpi").addEventListener("change", updateCost);
 
-/* ── COST CALCULATION ── */
+/* ── COST ── */
 function updateCost() {
   const area   = parseFloat(document.getElementById("area").value) || 0;
   const dpi    = document.getElementById("dpi").value;
   let matPrice = matPrices[selectedMat][selectedSize] || 0;
-
   if (dpi === "600") matPrice = Math.round(matPrice * 1.2);
   if (dpi === "150") matPrice = Math.round(matPrice * 0.9);
 
-  const labor     = laborRates[selectedMat];
-  const tileAm    = tileArea[selectedSize];
-  const tiles     = Math.ceil((area * 1.10) / tileAm);
-  const matTotal  = Math.round(area * matPrice);
-  const laborTotal= Math.round(area * labor);
-  const grand     = matTotal + laborTotal;
-
-  const fmt = n => n.toLocaleString("th-TH");
+  const labor      = laborRates[selectedMat];
+  const tiles      = Math.ceil((area * 1.10) / tileArea[selectedSize]);
+  const matTotal   = Math.round(area * matPrice);
+  const laborTotal = Math.round(area * labor);
+  const grand      = matTotal + laborTotal;
+  const fmt        = n => n.toLocaleString("th-TH");
 
   document.getElementById("cMatPrice").textContent  = fmt(matPrice);
   document.getElementById("cArea").textContent       = area;
@@ -597,10 +432,24 @@ function updateCost() {
   document.getElementById("cLaborTotal").textContent = fmt(laborTotal);
   document.getElementById("cGrandTotal").textContent = fmt(grand);
 }
-
 updateCost();
 
-/* ── UPLOAD TILE (ชั่วคราว) ── */
+/* ── GALLERY HELPER ── */
+function addTileToGallery(src, prepend = false) {
+  const gallery = document.getElementById("gallery");
+  const img     = document.createElement("img");
+  img.src       = src;
+  img.onclick   = () => {
+    document.querySelectorAll(".gallery img").forEach(i => i.classList.remove("selected"));
+    img.classList.add("selected");
+    currentTileUrl = src;
+    if (typeof applyTexture === "function") applyTexture(src);
+  };
+  if (prepend) gallery.prepend(img);
+  else         gallery.appendChild(img);
+}
+
+/* ── UPLOAD ── */
 document.getElementById("uploadBtn").addEventListener("click", () => {
   document.getElementById("tileUpload").click();
 });
@@ -608,76 +457,83 @@ document.getElementById("uploadBtn").addEventListener("click", () => {
 document.getElementById("tileUpload").addEventListener("change", e => {
   const file = e.target.files[0];
   if (!file) return;
-  const url = URL.createObjectURL(file);
+  const url      = URL.createObjectURL(file);  // ไม่เก็บ localStorage
+  currentTileUrl = url;
+  addTileToGallery(url, true);
   if (typeof applyTexture === "function") applyTexture(url);
-  // เพิ่มใน gallery ชั่วคราว
-  const gallery = document.getElementById("gallery");
-  const img = document.createElement("img");
-  img.src = url;
-  img.onclick = () => {
-    document.querySelectorAll(".gallery img").forEach(i => i.classList.remove("selected"));
-    img.classList.add("selected");
-    if (typeof applyTexture === "function") applyTexture(url);
-  };
-  gallery.prepend(img);
-  // reset input
+  const first = document.querySelector(".gallery img");
+  if (first) first.classList.add("selected");
   e.target.value = "";
 });
 
-/* ── GENERATE ── */
-document.getElementById("generateBtn").addEventListener("click", generateTile);
-window.addEventListener("DOMContentLoaded", loadSavedTiles);
+/* ── DOMContentLoaded ── */
+window.addEventListener("DOMContentLoaded", () => {
+  loadSavedTiles();
 
+  document.getElementById("receiptBtn").addEventListener("click", () => {
+    const area     = parseFloat(document.getElementById("area").value) || 0;
+    const dpi      = document.getElementById("dpi").value;
+    let matPrice   = matPrices[selectedMat][selectedSize] || 0;
+    if (dpi === "600") matPrice = Math.round(matPrice * 1.2);
+    if (dpi === "150") matPrice = Math.round(matPrice * 0.9);
+
+    const labor      = laborRates[selectedMat];
+    const tiles      = Math.ceil((area * 1.10) / tileArea[selectedSize]);
+    const matTotal   = Math.round(area * matPrice);
+    const laborTotal = Math.round(area * labor);
+    const grand      = matTotal + laborTotal;
+    const matNames   = { ceramic:"เซรามิก", granito:"แกรนิตโต้", marble:"หินอ่อน", wood:"ลายไม้" };
+
+    localStorage.setItem("receiptConfig", JSON.stringify({
+      tileUrl: currentTileUrl,
+      mat:     selectedMat,
+      matName: matNames[selectedMat],
+      size:    selectedSize,
+      dpi, area, matPrice, tiles, matTotal, labor, laborTotal, grand,
+      prompt:  document.getElementById("prompt").value.trim(),
+      date:    new Date().toLocaleDateString("th-TH", { year:"numeric", month:"long", day:"numeric" }),
+    }));
+
+    window.location.href = "receipt.html";
+  });
+});
+
+/* ── LOAD GALLERY FROM SERVER ── */
 async function loadSavedTiles() {
+  document.getElementById("gallery").innerHTML = "";
   try {
-    const res   = await fetch("/tiles/" + parseInt(user.id));
+    const res = await fetch("/tiles/" + parseInt(user.id));
     if (!res.ok) return;
     const tiles = await res.json();
-    const gallery = document.getElementById("gallery");
-    gallery.innerHTML = "";
-    tiles.forEach(tile => {
-      const img = document.createElement("img");
-      img.src = tile.tile_url;
-      img.onclick = () => {
-        document.querySelectorAll(".gallery img").forEach(i => i.classList.remove("selected"));
-        img.classList.add("selected");
-        if (typeof applyTexture === "function") applyTexture(tile.tile_url);
-      };
-      gallery.appendChild(img);
-    });
+    tiles.forEach(tile => addTileToGallery(tile.tile_url));
   } catch (err) {
     console.log("Load tiles error:", err);
   }
 }
 
+/* ── GENERATE ── */
+document.getElementById("generateBtn").addEventListener("click", generateTile);
+
 async function generateTile() {
-  const prompt  = document.getElementById("prompt").value.trim();
-  const dpi     = document.getElementById("dpi").value;
-  const btn     = document.getElementById("generateBtn");
+  const prompt = document.getElementById("prompt").value.trim();
+  const dpi    = document.getElementById("dpi").value;
+  const btn    = document.getElementById("generateBtn");
 
   if (!prompt) { alert("กรุณาใส่ลวดลายที่ต้องการ"); return; }
-
-  btn.disabled  = true;
+  btn.disabled    = true;
   btn.textContent = "Generating...";
 
   try {
     const res = await fetch("/generate-tile", {
-      method: "POST",
+      method:  "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        prompt,
-        userId:   parseInt(user.id),
-        tileSize: selectedSize,
-        dpi:      parseInt(dpi),
-      }),
+      body:    JSON.stringify({ prompt, userId: parseInt(user.id), tileSize: selectedSize, dpi: parseInt(dpi) }),
     });
-
     if (!res.ok) { alert("Generation failed: " + await res.text()); return; }
-
-    const data = await res.json();
+    const data     = await res.json();
+    currentTileUrl = data.tileUrl;
     if (typeof applyTexture === "function") applyTexture(data.tileUrl);
     loadSavedTiles();
-
   } catch (err) {
     console.error(err);
     alert("Server error");
