@@ -256,7 +256,7 @@ select:focus { outline: none; border-color: var(--blue); }
 <body>
 
 <nav>
-  <div class="nav-logo">✦ TileAI</div>
+  <a class="nav-logo" href="home.html" style="text-decoration:none;color:#ffffff;cursor:pointer;" title="กลับไปหน้าหลัก">← ✦ TileAI</a>
   <div class="nav-user" id="navUser"></div>
 </nav>
 
@@ -306,15 +306,6 @@ select:focus { outline: none; border-color: var(--blue); }
         <input type="number" id="area" value="20" min="1" max="9999" step="0.5">
         <span class="area-unit">ตร.ม.</span>
       </div>
-    </div>
-
-    <div>
-      <div class="section-title">ความละเอียด</div>
-      <select id="dpi">
-        <option value="150">150 DPI — Draft</option>
-        <option value="300" selected>300 DPI — Standard</option>
-        <option value="600">600 DPI — Premium (+20%)</option>
-      </select>
     </div>
 
     <div class="btn-group">
@@ -405,17 +396,12 @@ document.getElementById("matGroup").addEventListener("click", e => {
   updateCost();
 });
 
-/* ── AREA / DPI ── */
 document.getElementById("area").addEventListener("input", updateCost);
-document.getElementById("dpi").addEventListener("change", updateCost);
 
 /* ── COST ── */
 function updateCost() {
   const area   = parseFloat(document.getElementById("area").value) || 0;
-  const dpi    = document.getElementById("dpi").value;
   let matPrice = matPrices[selectedMat][selectedSize] || 0;
-  if (dpi === "600") matPrice = Math.round(matPrice * 1.2);
-  if (dpi === "150") matPrice = Math.round(matPrice * 0.9);
 
   const labor      = laborRates[selectedMat];
   const tiles      = Math.ceil((area * 1.10) / tileArea[selectedSize]);
@@ -472,10 +458,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
   document.getElementById("receiptBtn").addEventListener("click", () => {
     const area     = parseFloat(document.getElementById("area").value) || 0;
-    const dpi      = document.getElementById("dpi").value;
     let matPrice   = matPrices[selectedMat][selectedSize] || 0;
-    if (dpi === "600") matPrice = Math.round(matPrice * 1.2);
-    if (dpi === "150") matPrice = Math.round(matPrice * 0.9);
 
     const labor      = laborRates[selectedMat];
     const tiles      = Math.ceil((area * 1.10) / tileArea[selectedSize]);
@@ -489,7 +472,7 @@ window.addEventListener("DOMContentLoaded", () => {
       mat:     selectedMat,
       matName: matNames[selectedMat],
       size:    selectedSize,
-      dpi, area, matPrice, tiles, matTotal, labor, laborTotal, grand,
+      area, matPrice, tiles, matTotal, labor, laborTotal, grand,
       prompt:  document.getElementById("prompt").value.trim(),
       date:    new Date().toLocaleDateString("th-TH", { year:"numeric", month:"long", day:"numeric" }),
     }));
@@ -516,7 +499,6 @@ document.getElementById("generateBtn").addEventListener("click", generateTile);
 
 async function generateTile() {
   const prompt = document.getElementById("prompt").value.trim();
-  const dpi    = document.getElementById("dpi").value;
   const btn    = document.getElementById("generateBtn");
 
   if (!prompt) { alert("กรุณาใส่ลวดลายที่ต้องการ"); return; }
@@ -527,7 +509,7 @@ async function generateTile() {
     const res = await fetch("/generate-tile", {
       method:  "POST",
       headers: { "Content-Type": "application/json" },
-      body:    JSON.stringify({ prompt, userId: parseInt(user.id), tileSize: selectedSize, dpi: parseInt(dpi) }),
+      body:    JSON.stringify({ prompt, userId: parseInt(user.id), tileSize: selectedSize }),
     });
     if (!res.ok) { alert("Generation failed: " + await res.text()); return; }
     const data     = await res.json();

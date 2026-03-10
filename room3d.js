@@ -41,7 +41,7 @@ function init() {
   controls.maxPolarAngle  = Math.PI / 2.1;
 
   // Lighting
-  const ambient = new THREE.AmbientLight(0xffffff, 0.0);
+  const ambient = new THREE.AmbientLight(0xffffff, 0.4);
   scene.add(ambient);
 
   const sun = new THREE.DirectionalLight(0xfff5e4, 0.5);
@@ -49,7 +49,7 @@ function init() {
   sun.castShadow = true;
   scene.add(sun);
 
-  const fill = new THREE.DirectionalLight(0xe8f0ff, 0.4);
+  const fill = new THREE.DirectionalLight(0xe8f0ff, 0.3);
   fill.position.set(-5, 3, -5);
   scene.add(fill);
 
