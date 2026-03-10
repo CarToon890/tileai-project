@@ -234,6 +234,20 @@ select:focus { outline: none; border-color: var(--blue); }
 .cost-total .unit { font-size: 11px; color: #94a3b8; }
 .cost-note { font-size: 11px; color: var(--muted); line-height: 1.5; }
 
+.toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  cursor: pointer;
+  font-size: 13px;
+  color: #64748b;
+  border-bottom: 1px solid rgba(0,0,0,.05);
+}
+.toggle-row:last-child { border-bottom: none; }
+.toggle-row input[type="checkbox"] { accent-color: var(--blue); width: 15px; height: 15px; cursor: pointer; }
+.toggle-label { user-select: none; }
+
 .receipt-btn {
   width: 100%;
   padding: 11px;
@@ -256,7 +270,7 @@ select:focus { outline: none; border-color: var(--blue); }
 <body>
 
 <nav>
-  <a class="nav-logo" href="home.html" style="text-decoration:none;color:#ffffff;cursor:pointer;" title="กลับไปหน้าหลัก">← ✦ TileAI</a>
+  <a class="nav-logo" href="home.html" style="text-decoration:none;color:inherit;cursor:pointer;">✦ TileAI</a>
   <div class="nav-user" id="navUser"></div>
 </nav>
 
@@ -308,6 +322,51 @@ select:focus { outline: none; border-color: var(--blue); }
       </div>
     </div>
 
+    <div>
+      <div class="section-title">จำนวนห้อง</div>
+      <div class="area-wrap">
+        <input type="number" id="rooms" value="1" min="1" max="99" step="1">
+        <span class="area-unit">ห้อง</span>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-title">% สำรองของเสีย</div>
+      <div class="pill-group" id="wasteGroup">
+        <div class="pill" data-waste="5">5%</div>
+        <div class="pill active" data-waste="10">10%</div>
+        <div class="pill" data-waste="15">15%</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-title">รูปแบบการปู</div>
+      <div class="pill-group" id="patternGroup">
+        <div class="pill active" data-pattern="straight">แนวตรง</div>
+        <div class="pill" data-pattern="diagonal">เฉียง 45° (+15%)</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-title">ชั้นของอาคาร</div>
+      <div class="pill-group" id="floorGroup">
+        <div class="pill active" data-floor="1">ชั้น 1</div>
+        <div class="pill" data-floor="2">ชั้น 2+</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-title">ตัวเลือกเพิ่มเติม</div>
+      <label class="toggle-row">
+        <input type="checkbox" id="toggleLabor" checked>
+        <span class="toggle-label">รวมค่าแรงช่าง</span>
+      </label>
+      <label class="toggle-row">
+        <input type="checkbox" id="toggleGrout">
+        <span class="toggle-label">รวมค่ากาวและยาแนว (~100 ฿/ตร.ม.)</span>
+      </label>
+    </div>
+
     <div class="btn-group">
       <button class="gen-btn" id="generateBtn">Generate Tile</button>
       <button class="upload-btn" id="uploadBtn" title="Upload รูปกระเบื้อง">📁</button>
@@ -343,8 +402,8 @@ select:focus { outline: none; border-color: var(--blue); }
       </div>
       <div class="cost-note">
         * ราคาอ้างอิงตลาดไทย ปี 2568<br>
-        * รวมค่าแรงช่างปูแล้ว<br>
-        * ไม่รวมค่ากาวและยาแนว
+        * ค่าแรงชั้น 2+ บวกเพิ่ม 20%<br>
+        * เฉียง 45° เสียวัสดุเพิ่ม 15%
       </div>
       <button class="receipt-btn" id="receiptBtn">ออกใบเสร็จ →</button>
     </div>
@@ -361,9 +420,12 @@ if (!user) { alert("กรุณา Login ก่อน"); window.location.href =
 document.getElementById("navUser").textContent = user.email;
 
 /* ── STATE ── */
-let selectedSize   = "30x30";
-let selectedMat    = "ceramic";
-let currentTileUrl = null;
+let selectedSize    = "30x30";
+let selectedMat     = "ceramic";
+let currentTileUrl  = null;
+let selectedWaste   = 10;
+let selectedPattern = "straight";
+let selectedFloor   = 1;
 
 /* ── PRICES ── */
 const matPrices = {
@@ -397,25 +459,68 @@ document.getElementById("matGroup").addEventListener("click", e => {
 });
 
 document.getElementById("area").addEventListener("input", updateCost);
+document.getElementById("rooms").addEventListener("input", updateCost);
+document.getElementById("toggleLabor").addEventListener("change", updateCost);
+document.getElementById("toggleGrout").addEventListener("change", updateCost);
+
+// Waste pills
+document.getElementById("wasteGroup").addEventListener("click", e => {
+  const pill = e.target.closest(".pill");
+  if (!pill) return;
+  document.querySelectorAll("#wasteGroup .pill").forEach(p => p.classList.remove("active"));
+  pill.classList.add("active");
+  selectedWaste = parseInt(pill.dataset.waste);
+  updateCost();
+});
+
+// Pattern pills
+document.getElementById("patternGroup").addEventListener("click", e => {
+  const pill = e.target.closest(".pill");
+  if (!pill) return;
+  document.querySelectorAll("#patternGroup .pill").forEach(p => p.classList.remove("active"));
+  pill.classList.add("active");
+  selectedPattern = pill.dataset.pattern;
+  updateCost();
+});
+
+// Floor pills
+document.getElementById("floorGroup").addEventListener("click", e => {
+  const pill = e.target.closest(".pill");
+  if (!pill) return;
+  document.querySelectorAll("#floorGroup .pill").forEach(p => p.classList.remove("active"));
+  pill.classList.add("active");
+  selectedFloor = parseInt(pill.dataset.floor);
+  updateCost();
+});
 
 /* ── COST ── */
 function updateCost() {
-  const area   = parseFloat(document.getElementById("area").value) || 0;
-  let matPrice = matPrices[selectedMat][selectedSize] || 0;
+  const area        = parseFloat(document.getElementById("area").value) || 0;
+  const rooms       = parseInt(document.getElementById("rooms").value) || 1;
+  const totalArea   = area * rooms;
+  const includeLabor = document.getElementById("toggleLabor").checked;
+  const includeGrout = document.getElementById("toggleGrout").checked;
+  const diagonalMult = selectedPattern === "diagonal" ? 1.15 : 1.0;
+  const floorMult    = selectedFloor === 2 ? 1.2 : 1.0;
+  const wasteMult    = 1 + (selectedWaste / 100);
 
-  const labor      = laborRates[selectedMat];
-  const tiles      = Math.ceil((area * 1.10) / tileArea[selectedSize]);
-  const matTotal   = Math.round(area * matPrice);
-  const laborTotal = Math.round(area * labor);
-  const grand      = matTotal + laborTotal;
+  let matPrice = matPrices[selectedMat][selectedSize] || 0;
+  const labor  = includeLabor ? Math.round(laborRates[selectedMat] * floorMult) : 0;
+  const grout  = includeGrout ? 100 : 0;
+
+  const tiles      = Math.ceil((totalArea * wasteMult * diagonalMult) / tileArea[selectedSize]);
+  const matTotal   = Math.round(totalArea * matPrice * diagonalMult);
+  const laborTotal = Math.round(totalArea * labor);
+  const groutTotal = Math.round(totalArea * grout);
+  const grand      = matTotal + laborTotal + groutTotal;
   const fmt        = n => n.toLocaleString("th-TH");
 
   document.getElementById("cMatPrice").textContent  = fmt(matPrice);
-  document.getElementById("cArea").textContent       = area;
+  document.getElementById("cArea").textContent       = totalArea % 1 === 0 ? totalArea : totalArea.toFixed(1);
   document.getElementById("cTiles").textContent      = fmt(tiles);
   document.getElementById("cMatTotal").textContent   = fmt(matTotal);
-  document.getElementById("cLabor").textContent      = fmt(labor);
-  document.getElementById("cLaborTotal").textContent = fmt(laborTotal);
+  document.getElementById("cLabor").textContent      = labor > 0 ? fmt(labor) : "—";
+  document.getElementById("cLaborTotal").textContent = labor > 0 ? fmt(laborTotal) : "—";
   document.getElementById("cGrandTotal").textContent = fmt(grand);
 }
 updateCost();
@@ -457,22 +562,38 @@ window.addEventListener("DOMContentLoaded", () => {
   loadSavedTiles();
 
   document.getElementById("receiptBtn").addEventListener("click", () => {
-    const area     = parseFloat(document.getElementById("area").value) || 0;
-    let matPrice   = matPrices[selectedMat][selectedSize] || 0;
+    const area         = parseFloat(document.getElementById("area").value) || 0;
+    const rooms        = parseInt(document.getElementById("rooms").value) || 1;
+    const totalArea    = area * rooms;
+    const includeLabor = document.getElementById("toggleLabor").checked;
+    const includeGrout = document.getElementById("toggleGrout").checked;
+    const diagonalMult = selectedPattern === "diagonal" ? 1.15 : 1.0;
+    const floorMult    = selectedFloor === 2 ? 1.2 : 1.0;
+    const wasteMult    = 1 + (selectedWaste / 100);
 
-    const labor      = laborRates[selectedMat];
-    const tiles      = Math.ceil((area * 1.10) / tileArea[selectedSize]);
-    const matTotal   = Math.round(area * matPrice);
-    const laborTotal = Math.round(area * labor);
-    const grand      = matTotal + laborTotal;
+    let matPrice = matPrices[selectedMat][selectedSize] || 0;
+    const labor  = includeLabor ? Math.round(laborRates[selectedMat] * floorMult) : 0;
+    const grout  = includeGrout ? 100 : 0;
+
+    const tiles      = Math.ceil((totalArea * wasteMult * diagonalMult) / tileArea[selectedSize]);
+    const matTotal   = Math.round(totalArea * matPrice * diagonalMult);
+    const laborTotal = Math.round(totalArea * labor);
+    const groutTotal = Math.round(totalArea * grout);
+    const grand      = matTotal + laborTotal + groutTotal;
     const matNames   = { ceramic:"เซรามิก", granito:"แกรนิตโต้", marble:"หินอ่อน", wood:"ลายไม้" };
 
     localStorage.setItem("receiptConfig", JSON.stringify({
-      tileUrl: currentTileUrl,
-      mat:     selectedMat,
-      matName: matNames[selectedMat],
-      size:    selectedSize,
-      area, matPrice, tiles, matTotal, labor, laborTotal, grand,
+      tileUrl:      currentTileUrl,
+      mat:          selectedMat,
+      matName:      matNames[selectedMat],
+      size:         selectedSize,
+      area:         totalArea,
+      rooms,
+      waste:        selectedWaste,
+      pattern:      selectedPattern,
+      floor:        selectedFloor,
+      includeLabor, includeGrout,
+      matPrice, tiles, matTotal, labor, laborTotal, groutTotal, grand,
       prompt:  document.getElementById("prompt").value.trim(),
       date:    new Date().toLocaleDateString("th-TH", { year:"numeric", month:"long", day:"numeric" }),
     }));

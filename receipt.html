@@ -312,24 +312,32 @@ nav {
           <td><span id="rMatPrice">—</span> ฿/ตร.ม.</td>
         </tr>
         <tr>
-          <td>พื้นที่ปู</td>
+          <td>พื้นที่ปู (<span id="rRooms">—</span> ห้อง)</td>
           <td><span id="rArea">—</span> ตร.ม.</td>
         </tr>
         <tr>
-          <td>จำนวนแผ่น (รวม +10% ของเสีย)</td>
+          <td>จำนวนแผ่น (สำรอง <span id="rWaste">—</span>%)</td>
           <td><span id="rTiles">—</span> แผ่น</td>
+        </tr>
+        <tr>
+          <td>รูปแบบการปู</td>
+          <td><span id="rPattern">—</span></td>
         </tr>
         <tr class="subtotal">
           <td>ค่าวัสดุรวม</td>
           <td><span id="rMatTotal">—</span> ฿</td>
         </tr>
-        <tr>
-          <td>ค่าแรงช่างปู</td>
+        <tr id="rowLabor">
+          <td>ค่าแรงช่างปู (<span id="rFloor">—</span>)</td>
           <td><span id="rLabor">—</span> ฿/ตร.ม.</td>
         </tr>
-        <tr class="subtotal">
+        <tr id="rowLaborTotal" class="subtotal">
           <td>ค่าแรงรวม</td>
           <td><span id="rLaborTotal">—</span> ฿</td>
+        </tr>
+        <tr id="rowGrout">
+          <td>ค่ากาวและยาแนว</td>
+          <td><span id="rGroutTotal">—</span> ฿</td>
         </tr>
       </table>
 
@@ -346,8 +354,8 @@ nav {
     <!-- FOOTER -->
     <div class="receipt-footer">
       * ราคาอ้างอิงตลาดไทย ปี 2568 &nbsp;|&nbsp;
-      * รวมค่าแรงช่างปูแล้ว &nbsp;|&nbsp;
-      * ไม่รวมค่ากาวและยาแนว &nbsp;|&nbsp;
+      * ค่าแรงชั้น 2+ บวกเพิ่ม 20% &nbsp;|&nbsp;
+      * เฉียง 45° เสียวัสดุเพิ่ม 15% &nbsp;|&nbsp;
       * ราคาอาจเปลี่ยนแปลงตามพื้นที่และสภาวะตลาด
     </div>
 
@@ -397,18 +405,39 @@ document.getElementById("rPrompt").textContent =
 const tags = [
   config.matName,
   config.size + " cm",
+  config.pattern === "diagonal" ? "เฉียง 45°" : "แนวตรง",
+  "ชั้น " + (config.floor === 2 ? "2+" : "1"),
 ];
 document.getElementById("rTags").innerHTML =
   tags.map(t => `<span class="tag">${t}</span>`).join("");
 
 // Numbers
-document.getElementById("rMatPrice").textContent   = fmt(config.matPrice);
-document.getElementById("rArea").textContent        = config.area;
-document.getElementById("rTiles").textContent       = fmt(config.tiles);
-document.getElementById("rMatTotal").textContent    = fmt(config.matTotal);
-document.getElementById("rLabor").textContent       = fmt(config.labor);
-document.getElementById("rLaborTotal").textContent  = fmt(config.laborTotal);
-document.getElementById("rGrand").textContent       = fmt(config.grand);
+document.getElementById("rMatPrice").textContent  = fmt(config.matPrice);
+document.getElementById("rRooms").textContent     = config.rooms || 1;
+document.getElementById("rArea").textContent      = config.area;
+document.getElementById("rWaste").textContent     = config.waste || 10;
+document.getElementById("rTiles").textContent     = fmt(config.tiles);
+document.getElementById("rPattern").textContent   = config.pattern === "diagonal" ? "เฉียง 45° (+15%)" : "แนวตรง";
+document.getElementById("rMatTotal").textContent  = fmt(config.matTotal);
+
+// Labor (conditional)
+if (config.includeLabor && config.labor > 0) {
+  document.getElementById("rFloor").textContent      = config.floor === 2 ? "ชั้น 2+ · +20%" : "ชั้น 1";
+  document.getElementById("rLabor").textContent      = fmt(config.labor);
+  document.getElementById("rLaborTotal").textContent = fmt(config.laborTotal);
+} else {
+  document.getElementById("rowLabor").style.display      = "none";
+  document.getElementById("rowLaborTotal").style.display = "none";
+}
+
+// Grout (conditional)
+if (config.includeGrout && config.groutTotal > 0) {
+  document.getElementById("rGroutTotal").textContent = fmt(config.groutTotal);
+} else {
+  document.getElementById("rowGrout").style.display = "none";
+}
+
+document.getElementById("rGrand").textContent = fmt(config.grand);
 </script>
 
 </body>
