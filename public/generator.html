@@ -282,7 +282,7 @@ select:focus { outline: none; border-color: var(--blue); }
 <body>
 
 <nav>
-  <a class="nav-logo" href="home.html" style="text-decoration:none;color:#ffffff;cursor:pointer;" title="กลับไปหน้าหลัก">← ✦ TileAI</a>
+  <a class="nav-logo" href="home.html" style="text-decoration:none;color:inherit;cursor:pointer;">✦ TileAI</a>
   <div class="nav-user" id="navUser"></div>
 </nav>
 
@@ -403,7 +403,7 @@ select:focus { outline: none; border-color: var(--blue); }
       <div class="cost-title">ประมาณการค่าใช้จ่าย</div>
       <div class="cost-row"><span>ราคาวัสดุ</span><span class="val"><span id="cMatPrice">—</span> ฿/ตร.ม.</span></div>
       <div class="cost-row"><span>พื้นที่</span><span class="val"><span id="cArea">—</span> ตร.ม.</span></div>
-      <div class="cost-row"><span>จำนวนแผ่น (+10%)</span><span class="val"><span id="cTiles">—</span> แผ่น</span></div>
+      <div class="cost-row"><span>จำนวนแผ่น (+<span id="cWaste">10</span>%)</span><span class="val"><span id="cTiles">—</span> แผ่น</span></div>
       <div class="cost-row"><span>ค่าวัสดุรวม</span><span class="val"><span id="cMatTotal">—</span> ฿</span></div>
       <hr class="divider">
       <div class="cost-row"><span>ค่าแรง</span><span class="val"><span id="cLabor">—</span> ฿/ตร.ม.</span></div>
@@ -528,6 +528,7 @@ function updateCost() {
   const grand      = matTotal + laborTotal + groutTotal;
   const fmt        = n => n.toLocaleString("th-TH");
 
+  document.getElementById("cWaste").textContent     = selectedWaste;
   document.getElementById("cMatPrice").textContent  = fmt(matPrice);
   document.getElementById("cArea").textContent       = totalArea % 1 === 0 ? totalArea : totalArea.toFixed(1);
   document.getElementById("cTiles").textContent      = fmt(tiles);
