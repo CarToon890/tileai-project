@@ -1,6 +1,7 @@
 # ✦ TileAI
 
-ระบบออกแบบและประมาณราคากระเบื้องด้วย AI สำหรับตลาดไทย
+ระบบออกแบบและประมาณราคากระเบื้องด้วย AI สำหรับตลาดไทย  
+Demo: [tileai-project.vercel.app](https://tileai-project.vercel.app)
 
 ---
 
@@ -25,11 +26,31 @@ login.html → home.html → generator.html → receipt.html
 | Database  | PostgreSQL (Supabase)              |
 | AI Image  | OpenAI gpt-image-1                 |
 | 3D Viewer | Three.js r128                      |
+| Deploy    | Vercel (Serverless)                |
 | Font      | IBM Plex Sans Thai + IBM Plex Mono |
 
 ---
 
-## Setup
+## Project Structure
+
+```
+tileai-project/
+├── server.js           # Express backend (Vercel serverless)
+├── vercel.json         # Vercel config
+├── package.json
+└── public/
+    ├── generator.html  # สร้าง/upload กระเบื้อง + คำนวณราคา
+    ├── receipt.html    # ใบเสร็จ
+    ├── room3d.js       # Three.js 3D viewer
+    ├── login.html
+    ├── register.html
+    ├── home.html
+    └── styles.css
+```
+
+---
+
+## Setup (Local)
 
 ### 1. ติดตั้ง dependencies
 
@@ -55,18 +76,39 @@ node server.js
 
 ---
 
+## Deploy (Vercel)
+
+### 1. ตั้ง Environment Variables บน Vercel Dashboard
+
+```
+DATABASE_URL        → Project Settings → Environment Variables
+OPENAI_API_KEY      → Project Settings → Environment Variables
+```
+
+### 2. `vercel.json` ต้องอยู่ใน root
+
+```json
+{
+  "version": 2,
+  "builds": [{ "src": "server.js", "use": "@vercel/node" }],
+  "routes": [{ "src": "/(.*)", "dest": "/server.js" }]
+}
+```
+
+### 3. Push ขึ้น GitHub — Vercel จะ deploy อัตโนมัติ
+
+---
+
 ## API Endpoints
 
-| Method | Path              | Description                            |
-| ------ | ----------------- | -------------------------------------- |
-| POST   | `/register`       | สมัครสมาชิก                            |
-| POST   | `/login`          | เข้าสู่ระบบ                            |
-| POST   | `/generate-tile`  | สร้างรูปกระเบื้องด้วย AI (gpt-image-1) |
-| POST   | `/upload-room`    | Upload รูปห้อง (max 15MB)              |
-| GET    | `/tiles/:userId`  | ดึง gallery ของ user                   |
-| DELETE | `/tile/:id`       | ลบกระเบื้อง                            |
-| GET    | `/factory-config` | ดึงราคาวัสดุและค่าแรง                  |
-| GET    | `/uploads/*`      | Static files                           |
+| Method | Path             | Description                            |
+| ------ | ---------------- | -------------------------------------- |
+| POST   | `/register`      | สมัครสมาชิก                            |
+| POST   | `/login`         | เข้าสู่ระบบ                            |
+| POST   | `/generate-tile` | สร้างรูปกระเบื้องด้วย AI (gpt-image-1) |
+| POST   | `/upload-room`   | Upload รูปห้อง (max 15MB)              |
+| GET    | `/tiles/:userId` | ดึง gallery ของ user                   |
+| DELETE | `/tile/:id`      | ลบกระเบื้อง                            |
 
 ---
 
@@ -99,25 +141,9 @@ node server.js
 
 ---
 
-## Files
-
-```
-tileai-project/
-├── server.js           # Express backend
-├── generator.html      # สร้าง/upload กระเบื้อง + คำนวณราคา
-├── receipt.html        # ใบเสร็จ
-├── room3d.js           # Three.js 3D viewer
-├── login.html
-├── register.html
-├── home.html
-└── styles.css
-```
-
----
-
 ## หมายเหตุ
 
-- ต้อง restore Supabase project ที่ [supabase.com](https://supabase.com) ก่อนใช้งาน ถ้า free tier หยุดทำงาน
-- Upload รูปกระเบื้องใช้ `URL.createObjectURL` — ไม่เก็บใน localStorage
-- Gallery โหลดจาก server เท่านั้น ต้องการ Supabase ที่ active อยู่
-- ราคา hardcode ไว้ใน frontend — ไม่ได้ดึงจากบริษัทใด
+- รูปที่ generate เก็บเป็น base64 ลง Supabase DB โดยตรง — ไม่ใช้ filesystem (Vercel read-only)
+- Supabase free tier หยุดทำงานหลัง 7 วันไม่มี activity — ต้อง restore ที่ [supabase.com](https://supabase.com)
+- AI generate รูปขนาด 1024×1024px เสมอ — ขนาดกระเบื้องที่เลือกไม่กระทบ resolution
+- ราคา hardcode ใน frontend — ไม่ได้ดึงจากบริษัทใด
