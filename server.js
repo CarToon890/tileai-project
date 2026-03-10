@@ -5,7 +5,6 @@ const bcrypt   = require("bcrypt");
 const cors     = require("cors");
 const path     = require("path");
 const multer   = require("multer");
-const { v4: uuidv4 } = require("uuid");
 const OpenAI   = require("openai");
 const fs       = require("fs");
 
