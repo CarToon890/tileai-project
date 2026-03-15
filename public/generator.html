@@ -246,6 +246,53 @@ select:focus { outline: none; border-color: var(--blue); }
   line-height: 1.5;
 }
 
+.field-hint {
+  font-size: 11px;
+  font-weight: 400;
+  color: #64748b;
+  margin-left: 4px;
+}
+
+.toggle-hint {
+  font-size: 11px;
+  color: #64748b;
+}
+
+.cost-section-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(59,130,246,.06);
+  border: 1px solid rgba(59,130,246,.15);
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin: 4px 0;
+}
+
+.cost-section-icon {
+  font-size: 20px;
+  width: 36px;
+  height: 36px;
+  background: rgba(59,130,246,.1);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.cost-section-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #3b82f6;
+}
+
+.cost-section-sub {
+  font-size: 11px;
+  color: #64748b;
+  margin-top: 2px;
+}
+
 .toggle-row {
   display: flex;
   align-items: center;
@@ -282,7 +329,7 @@ select:focus { outline: none; border-color: var(--blue); }
 <body>
 
 <nav>
-  <a class="nav-logo" href="home.html" style="text-decoration:none;color:#ffffff;cursor:pointer;" title="กลับไปหน้าหลัก">← ✦ TileAI</a>
+  <a class="nav-logo" href="home.html" style="text-decoration:none;color:inherit;cursor:pointer;">✦ TileAI</a>
   <div class="nav-user" id="navUser"></div>
 </nav>
 
@@ -294,8 +341,23 @@ select:focus { outline: none; border-color: var(--blue); }
       <textarea id="prompt" rows="3" placeholder="เช่น white marble with gold veins, geometric blue pattern, terracotta earth tones..."></textarea>
     </div>
 
+    <div class="btn-group">
+      <button class="gen-btn" id="generateBtn">Generate Tile</button>
+      <button class="upload-btn" id="uploadBtn" title="Upload รูปกระเบื้อง">📁</button>
+      <input type="file" id="tileUpload" accept="image/*" style="display:none">
+    </div>
+    <div id="genError" class="gen-error"></div>
+
+    <div class="cost-section-header">
+      <span class="cost-section-icon">฿</span>
+      <div>
+        <div class="cost-section-title">ข้อมูลสำหรับคำนวณราคา</div>
+        <div class="cost-section-sub">ไม่เกี่ยวกับลวดลายที่ AI สร้าง</div>
+      </div>
+    </div>
+
     <div>
-      <div class="section-title">ขนาดกระเบื้อง</div>
+      <div class="section-title">ขนาดกระเบื้อง <span class="field-hint">ใช้คำนวณจำนวนแผ่นที่ต้องสั่ง</span></div>
       <div class="pill-group" id="sizeGroup">
         <div class="pill active" data-size="30x30">30×30</div>
         <div class="pill" data-size="60x60">60×60</div>
@@ -305,7 +367,7 @@ select:focus { outline: none; border-color: var(--blue); }
     </div>
 
     <div>
-      <div class="section-title">ประเภทวัสดุ</div>
+      <div class="section-title">ประเภทวัสดุ <span class="field-hint">กำหนดราคาวัสดุและค่าแรงต่อ ตร.ม.</span></div>
       <div class="mat-grid" id="matGroup">
         <div class="mat-card active" data-mat="ceramic">
           <div class="mat-name">เซรามิก</div>
@@ -327,7 +389,7 @@ select:focus { outline: none; border-color: var(--blue); }
     </div>
 
     <div>
-      <div class="section-title">พื้นที่ปู</div>
+      <div class="section-title">พื้นที่ปูต่อห้อง <span class="field-hint">ขนาดพื้นที่ของแต่ละห้องที่ต้องการปู</span></div>
       <div class="area-wrap">
         <input type="number" id="area" value="20" min="1" max="9999" step="0.5">
         <span class="area-unit">ตร.ม.</span>
@@ -335,7 +397,7 @@ select:focus { outline: none; border-color: var(--blue); }
     </div>
 
     <div>
-      <div class="section-title">จำนวนห้อง</div>
+      <div class="section-title">จำนวนห้อง <span class="field-hint">ระบบจะคูณพื้นที่รวมให้อัตโนมัติ</span></div>
       <div class="area-wrap">
         <input type="number" id="rooms" value="1" min="1" max="99" step="1">
         <span class="area-unit">ห้อง</span>
@@ -343,16 +405,16 @@ select:focus { outline: none; border-color: var(--blue); }
     </div>
 
     <div>
-      <div class="section-title">% สำรองของเสีย</div>
+      <div class="section-title">สำรองกระเบื้องของเสีย <span class="field-hint">แนะนำ 10% สำหรับงานทั่วไป</span></div>
       <div class="pill-group" id="wasteGroup">
-        <div class="pill" data-waste="5">5%</div>
-        <div class="pill active" data-waste="10">10%</div>
-        <div class="pill" data-waste="15">15%</div>
+        <div class="pill" data-waste="5">5% — งานง่าย</div>
+        <div class="pill active" data-waste="10">10% — ทั่วไป</div>
+        <div class="pill" data-waste="15">15% — งานซับซ้อน</div>
       </div>
     </div>
 
     <div>
-      <div class="section-title">รูปแบบการปู</div>
+      <div class="section-title">รูปแบบการปู <span class="field-hint">การปูเฉียงใช้วัสดุเพิ่มขึ้น 15%</span></div>
       <div class="pill-group" id="patternGroup">
         <div class="pill active" data-pattern="straight">แนวตรง</div>
         <div class="pill" data-pattern="diagonal">เฉียง 45° (+15%)</div>
@@ -360,31 +422,24 @@ select:focus { outline: none; border-color: var(--blue); }
     </div>
 
     <div>
-      <div class="section-title">ชั้นของอาคาร</div>
+      <div class="section-title">ชั้นของอาคาร <span class="field-hint">ชั้น 2 ขึ้นไปค่าแรงบวกเพิ่ม 20%</span></div>
       <div class="pill-group" id="floorGroup">
         <div class="pill active" data-floor="1">ชั้น 1</div>
-        <div class="pill" data-floor="2">ชั้น 2+</div>
+        <div class="pill" data-floor="2">ชั้น 2+ (+20%)</div>
       </div>
     </div>
 
     <div>
-      <div class="section-title">ตัวเลือกเพิ่มเติม</div>
+      <div class="section-title">ตัวเลือกเพิ่มเติม <span class="field-hint">เลือกรายการที่ต้องการรวมในใบเสร็จ</span></div>
       <label class="toggle-row">
         <input type="checkbox" id="toggleLabor" checked>
-        <span class="toggle-label">รวมค่าแรงช่าง</span>
+        <span class="toggle-label">รวมค่าแรงช่างปู <span class="toggle-hint">— ราคาตามประเภทวัสดุ</span></span>
       </label>
       <label class="toggle-row">
         <input type="checkbox" id="toggleGrout">
-        <span class="toggle-label">รวมค่ากาวและยาแนว (~100 ฿/ตร.ม.)</span>
+        <span class="toggle-label">รวมค่ากาวและยาแนว <span class="toggle-hint">— ~100 ฿/ตร.ม.</span></span>
       </label>
     </div>
-
-    <div class="btn-group">
-      <button class="gen-btn" id="generateBtn">Generate Tile</button>
-      <button class="upload-btn" id="uploadBtn" title="Upload รูปกระเบื้อง">📁</button>
-      <input type="file" id="tileUpload" accept="image/*" style="display:none">
-    </div>
-    <div id="genError" class="gen-error"></div>
 
     <hr class="divider">
 
