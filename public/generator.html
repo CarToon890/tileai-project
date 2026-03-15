@@ -246,6 +246,61 @@ select:focus { outline: none; border-color: var(--blue); }
   line-height: 1.5;
 }
 
+.preview-section-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(16,185,129,.06);
+  border: 1px solid rgba(16,185,129,.15);
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin: 4px 0;
+}
+
+.preview-section-icon {
+  font-size: 20px;
+  width: 36px;
+  height: 36px;
+  background: rgba(16,185,129,.1);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.preview-section-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #10b981;
+}
+
+.preview-section-sub {
+  font-size: 11px;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+.grout-swatches {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 4px 0;
+}
+
+.grout-swatch {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  cursor: pointer;
+  border: 3px solid transparent;
+  transition: .15s;
+  box-shadow: 0 1px 4px rgba(0,0,0,.2);
+}
+
+.grout-swatch:hover { transform: scale(1.1); }
+.grout-swatch.active { border-color: var(--blue); }
+
 .field-hint {
   font-size: 11px;
   font-weight: 400;
@@ -348,6 +403,24 @@ select:focus { outline: none; border-color: var(--blue); }
     </div>
     <div id="genError" class="gen-error"></div>
 
+    <div class="preview-section-header">
+      <span class="preview-section-icon">⬜</span>
+      <div>
+        <div class="preview-section-title">ตัวเลือก 3D Preview</div>
+        <div class="preview-section-sub">ปรับการแสดงผลกระเบื้องในโมเดล 3D</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-title">สีร่องยาแนว <span class="field-hint">แสดงผลใน 3D เท่านั้น</span></div>
+      <div class="grout-swatches" id="groutGroup">
+        <div class="grout-swatch active" data-grout="#f5f5f5" title="ขาว" style="background:#f5f5f5"></div>
+        <div class="grout-swatch" data-grout="#c8c8c8" title="เทาอ่อน" style="background:#c8c8c8"></div>
+        <div class="grout-swatch" data-grout="#787878" title="เทาเข้ม" style="background:#787878"></div>
+        <div class="grout-swatch" data-grout="#222222" title="ดำ" style="background:#222222"></div>
+      </div>
+    </div>
+
     <div class="cost-section-header">
       <span class="cost-section-icon">฿</span>
       <div>
@@ -405,19 +478,21 @@ select:focus { outline: none; border-color: var(--blue); }
     </div>
 
     <div>
+      <div class="section-title">รูปแบบการปู <span class="field-hint">เฉียง 45° ใช้วัสดุเพิ่ม 15% · แสดงผลใน 3D ด้วย</span></div>
+      <div class="pill-group" id="patternGroup">
+        <div class="pill active" data-pattern="straight">ปูตรง</div>
+        <div class="pill" data-pattern="brick">สลับครึ่ง</div>
+        <div class="pill" data-pattern="vertical">แนวตั้ง</div>
+        <div class="pill" data-pattern="diagonal">เฉียง 45° (+15%)</div>
+      </div>
+    </div>
+
+    <div>
       <div class="section-title">สำรองกระเบื้องของเสีย <span class="field-hint">แนะนำ 10% สำหรับงานทั่วไป</span></div>
       <div class="pill-group" id="wasteGroup">
         <div class="pill" data-waste="5">5% — งานง่าย</div>
         <div class="pill active" data-waste="10">10% — ทั่วไป</div>
         <div class="pill" data-waste="15">15% — งานซับซ้อน</div>
-      </div>
-    </div>
-
-    <div>
-      <div class="section-title">รูปแบบการปู <span class="field-hint">การปูเฉียงใช้วัสดุเพิ่มขึ้น 15%</span></div>
-      <div class="pill-group" id="patternGroup">
-        <div class="pill active" data-pattern="straight">แนวตรง</div>
-        <div class="pill" data-pattern="diagonal">เฉียง 45° (+15%)</div>
       </div>
     </div>
 
@@ -526,6 +601,15 @@ document.getElementById("matGroup").addEventListener("click", e => {
   updateCost();
 });
 
+// Grout color (3D only)
+document.getElementById("groutGroup").addEventListener("click", e => {
+  const swatch = e.target.closest(".grout-swatch");
+  if (!swatch) return;
+  document.querySelectorAll(".grout-swatch").forEach(s => s.classList.remove("active"));
+  swatch.classList.add("active");
+  if (typeof window.setGroutColor === "function") window.setGroutColor(swatch.dataset.grout);
+});
+
 document.getElementById("area").addEventListener("input", updateCost);
 document.getElementById("rooms").addEventListener("input", updateCost);
 document.getElementById("toggleLabor").addEventListener("change", updateCost);
@@ -541,13 +625,14 @@ document.getElementById("wasteGroup").addEventListener("click", e => {
   updateCost();
 });
 
-// Pattern pills
+// Pattern pills — update both 3D and cost
 document.getElementById("patternGroup").addEventListener("click", e => {
   const pill = e.target.closest(".pill");
   if (!pill) return;
   document.querySelectorAll("#patternGroup .pill").forEach(p => p.classList.remove("active"));
   pill.classList.add("active");
   selectedPattern = pill.dataset.pattern;
+  if (typeof window.setPattern === "function") window.setPattern(pill.dataset.pattern);
   updateCost();
 });
 
