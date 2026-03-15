@@ -49,7 +49,7 @@ function init() {
   const ambient = new THREE.AmbientLight(0xffffff, 0.4);
   scene.add(ambient);
 
-  const sun = new THREE.DirectionalLight(0xfff5e4, 0.5);
+  const sun = new THREE.DirectionalLight(0xfff5e4, 0.6);
   sun.position.set(5, 10, 5);
   sun.castShadow = true;
   scene.add(sun);
@@ -151,31 +151,31 @@ function buildDiagonalCanvas(img, groutColor, size) {
   canvas.height = size;
   const ctx = canvas.getContext("2d");
 
-  // tile ที่หมุน 45° จะมีขนาด diagonal = T*√2
-  // ใช้ขนาดกระเบื้องเล็กลงนิดเพื่อให้พอดี canvas
-  const T   = TILE_PX;
-  const G   = Math.round(GROUT_PX * 0.7);           // ร่องเล็กลงนิดเพราะ rotate
-  const D   = Math.round(T * Math.SQRT2);            // diagonal ของ tile
-  const STEP = D + G;                                // ระยะห่างระหว่าง tile center
-
-  // พื้นหลังสีร่อง
   ctx.fillStyle = groutColor;
   ctx.fillRect(0, 0, size, size);
 
-  // วาด tile หมุน 45° ใน diamond grid
-  // grid แบบ diamond: (col + row*0.5)*STEP, row * (STEP/2)
-  const rows = Math.ceil(size / (STEP / 2)) + 2;
-  const cols = Math.ceil(size / STEP) + 2;
+  const T    = TILE_PX;
+  const G    = GROUT_PX;
+  // tile หมุน 45° → ระยะ center-to-center ต้องคูณ √2
+  // เพราะ edge ของ tile ที่หมุนแล้วอยู่ที่ T/2 ในทิศทาง diagonal
+  const STEP = (T + G) * Math.SQRT2;
 
-  for (let r = -1; r < rows; r++) {
-    for (let c = -1; c < cols; c++) {
-      // diamond grid offset
-      const cx = (c + (r % 2 === 0 ? 0 : 0.5)) * STEP;
-      const cy = r * (STEP / 2);
+  // ใช้ diagonal coordinate system:
+  // tile (i,j) อยู่ที่ screen (x,y) = ((i+j)*STEP/2, (i-j)*STEP/2)
+  // วิธีนี้การ์รันตีว่า tile จะไม่ซ้อนกันเลย
+  const range = Math.ceil(size / (STEP / 2)) + 4;
+
+  for (let i = -2; i < range; i++) {
+    for (let j = -range; j < range; j++) {
+      const cx = (i + j) * STEP / 2;
+      const cy = (i - j) * STEP / 2;
+
+      // cull tile ที่อยู่นอก canvas
+      if (cx + T < 0 || cx - T > size || cy + T < 0 || cy - T > size) continue;
 
       ctx.save();
       ctx.translate(cx, cy);
-      ctx.rotate(Math.PI / 4);          // หมุน 45°
+      ctx.rotate(Math.PI / 4);
       ctx.drawImage(img, -T / 2, -T / 2, T, T);
       ctx.restore();
     }
