@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TileAI — Generator</title>
+<title>ECOTile — Generator</title>
 
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 
@@ -37,6 +37,11 @@ body {
   overflow: hidden;
 }
 
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 nav {
   background: var(--navy);
   padding: 0 24px;
@@ -45,8 +50,11 @@ nav {
   align-items: center;
   justify-content: space-between;
   flex-shrink: 0;
+  animation: fadeUp 0.4s ease-out;
 }
-.nav-logo { font-size: 16px; font-weight: 600; color: #fff; letter-spacing: .5px; }
+.nav-logo { display: flex; align-items: center; gap: 6px; font-size: 16px; font-weight: 600; color: #fff; letter-spacing: .5px; }
+.nav-logo svg { color: #10b981; }
+.nav-logo span { color: #10b981; }
 .nav-user { font-size: 13px; color: #94a3b8; }
 
 .workspace { display: flex; flex: 1; overflow: hidden; }
@@ -61,6 +69,7 @@ nav {
   display: flex;
   flex-direction: column;
   gap: 20px;
+  animation: fadeUp 0.5s ease-out forwards;
 }
 
 .section-title {
@@ -94,12 +103,24 @@ nav {
   border-radius: 20px;
   font-size: 12px;
   cursor: pointer;
-  transition: .15s;
+  transition: all .2s cubic-bezier(0.4, 0, 0.2, 1);
   background: #f8fafc;
   color: var(--text);
 }
-.pill:hover { border-color: var(--blue); color: var(--blue); }
-.pill.active { background: var(--navy); border-color: var(--navy); color: #fff; }
+.pill:hover { border-color: var(--blue); color: var(--blue); transform: scale(1.05); }
+.pill.active { background: var(--navy); border-color: var(--navy); color: #fff; transform: scale(1.05); }
+
+.quick-tag {
+  background: rgba(59,130,246,.1);
+  color: var(--blue);
+  border: 1px solid rgba(59,130,246,.2);
+  border-radius: 12px;
+  padding: 4px 10px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: .15s;
+}
+.quick-tag:hover { background: rgba(59,130,246,.2); border-color: var(--blue); }
 
 .mat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .mat-card {
@@ -107,10 +128,10 @@ nav {
   border-radius: 10px;
   padding: 10px 12px;
   cursor: pointer;
-  transition: .15s;
+  transition: all .2s cubic-bezier(0.4, 0, 0.2, 1);
   background: #f8fafc;
 }
-.mat-card:hover { border-color: var(--blue); }
+.mat-card:hover { border-color: var(--blue); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
 .mat-card.active { border-color: var(--blue); background: #eff6ff; }
 .mat-name { font-size: 13px; font-weight: 500; margin-bottom: 2px; }
 .mat-range { font-size: 11px; color: var(--muted); }
@@ -155,10 +176,10 @@ select:focus { outline: none; border-color: var(--blue); }
   font-weight: 600;
   font-family: 'IBM Plex Sans Thai', sans-serif;
   cursor: pointer;
-  transition: .2s;
+  transition: all .2s cubic-bezier(0.4, 0, 0.2, 1);
 }
-.gen-btn:hover { background: var(--navy2); }
-.gen-btn:disabled { opacity: .5; cursor: not-allowed; }
+.gen-btn:hover { background: var(--navy2); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(30, 42, 58, 0.2); }
+.gen-btn:disabled { opacity: .5; cursor: not-allowed; transform: none; box-shadow: none; }
 
 .upload-btn {
   padding: 12px 14px;
@@ -166,14 +187,13 @@ select:focus { outline: none; border-color: var(--blue); }
   color: var(--navy);
   border: 1.5px solid var(--border);
   border-radius: 10px;
-  font-size: 18px;
   cursor: pointer;
-  transition: .2s;
+  transition: all .2s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   align-items: center;
   justify-content: center;
 }
-.upload-btn:hover { background: #e2e8f0; border-color: var(--navy); }
+.upload-btn:hover { background: #e2e8f0; border-color: var(--navy); transform: translateY(-2px); }
 
 .gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
 .gallery img {
@@ -216,6 +236,8 @@ select:focus { outline: none; border-color: var(--blue); }
   flex-direction: column;
   gap: 12px;
   overflow-y: auto;
+  opacity: 0;
+  animation: fadeUp 0.5s ease-out 0.2s forwards;
 }
 .cost-title { font-size: 13px; font-weight: 600; color: var(--navy); }
 .cost-row {
@@ -258,10 +280,10 @@ select:focus { outline: none; border-color: var(--blue); }
 }
 
 .preview-section-icon {
-  font-size: 20px;
   width: 36px;
   height: 36px;
   background: rgba(16,185,129,.1);
+  color: #10b981;
   border-radius: 8px;
   display: flex;
   align-items: center;
@@ -325,10 +347,10 @@ select:focus { outline: none; border-color: var(--blue); }
 }
 
 .cost-section-icon {
-  font-size: 20px;
   width: 36px;
   height: 36px;
   background: rgba(59,130,246,.1);
+  color: #3b82f6;
   border-radius: 8px;
   display: flex;
   align-items: center;
@@ -378,13 +400,32 @@ select:focus { outline: none; border-color: var(--blue); }
 .receipt-btn:hover { background: #2563eb; }
 
 .divider { border: none; border-top: 1px solid var(--border); }
+
+@media (max-width: 768px) {
+  .workspace { flex-direction: column; overflow-y: auto; }
+  .panel { width: 100%; border-right: none; border-bottom: 1px solid var(--border); overflow-y: visible; flex-shrink: 0; }
+  .main { flex-direction: column; overflow: visible; }
+  #viewer { width: 100%; height: 350px; flex: none; }
+  .cost-panel { width: 100%; border-left: none; border-top: 1px solid var(--border); overflow-y: visible; }
+  nav { flex-direction: column; height: auto; gap: 10px; padding: 15px; }
+  .nav-links { flex-wrap: wrap; justify-content: center; }
+}
 </style>
 </head>
 
 <body>
 
 <nav>
-  <a class="nav-logo" href="home.html" style="text-decoration:none;color:#ffffff;cursor:pointer;" title="กลับไปหน้าหลัก">← ✦ TileAI</a>
+  <div style="display: flex; align-items: center; gap: 30px;">
+    <a class="nav-logo" href="home.html" style="text-decoration:none;cursor:pointer;">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 22 12 12"/></svg>
+      ECO<span>Tile</span>
+    </a>
+    <div class="nav-links" style="display: flex; gap: 20px;">
+      <a href="optimization.html" style="color: #94a3b8; text-decoration: none; font-size: 14px;">2D Optimization</a>
+      <a href="generator.html" style="color: #fff; font-weight: 500; text-decoration: none; font-size: 14px;">3D Generator</a>
+    </div>
+  </div>
   <div class="nav-user" id="navUser"></div>
 </nav>
 
@@ -394,17 +435,27 @@ select:focus { outline: none; border-color: var(--blue); }
     <div class="prompt-wrap">
       <div class="section-title">ลวดลายที่ต้องการ</div>
       <textarea id="prompt" rows="3" placeholder="เช่น white marble with gold veins, geometric blue pattern, terracotta earth tones..."></textarea>
+      <div class="quick-actions" style="display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px;">
+        <span class="quick-tag" onclick="document.getElementById('prompt').value = 'White marble with soft gold veins'">หินอ่อนขาว-ทอง</span>
+        <span class="quick-tag" onclick="document.getElementById('prompt').value = 'Minimalist warm wood texture'">ลายไม้อบอุ่น</span>
+        <span class="quick-tag" onclick="document.getElementById('prompt').value = 'Blue Moroccan geometric pattern'">สไตล์โมร็อกโก</span>
+        <span class="quick-tag" onclick="document.getElementById('prompt').value = 'Dark concrete industrial style'">คอนกรีตลอฟต์</span>
+      </div>
     </div>
 
     <div class="btn-group">
       <button class="gen-btn" id="generateBtn">Generate Tile</button>
-      <button class="upload-btn" id="uploadBtn" title="Upload รูปกระเบื้อง">📁</button>
+      <button class="upload-btn" id="uploadBtn" title="Upload รูปกระเบื้อง">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      </button>
       <input type="file" id="tileUpload" accept="image/*" style="display:none">
     </div>
     <div id="genError" class="gen-error"></div>
 
     <div class="preview-section-header">
-      <span class="preview-section-icon">⬜</span>
+      <span class="preview-section-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+      </span>
       <div>
         <div class="preview-section-title">ตัวเลือก 3D Preview</div>
         <div class="preview-section-sub">ปรับการแสดงผลกระเบื้องในโมเดล 3D</div>
@@ -422,7 +473,9 @@ select:focus { outline: none; border-color: var(--blue); }
     </div>
 
     <div class="cost-section-header">
-      <span class="cost-section-icon">฿</span>
+      <span class="cost-section-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>
+      </span>
       <div>
         <div class="cost-section-title">ข้อมูลสำหรับคำนวณราคา</div>
         <div class="cost-section-sub">ไม่เกี่ยวกับลวดลายที่ AI สร้าง</div>

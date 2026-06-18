@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ECOTile — Optimization</title>
+
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --navy: #1e2a3a;
+  --navy2: #263548;
+  --blue: #3b82f6;
+  --bg: #f1f5f9;
+  --surface: #ffffff;
+  --border: #e2e8f0;
+  --text: #1e293b;
+  --muted: #64748b;
+  --success: #10b981;
+  --warn: #f59e0b;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'IBM Plex Sans Thai', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+nav {
+  background: var(--navy);
+  padding: 0 24px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  animation: fadeUp 0.4s ease-out;
+}
+.nav-logo { display: flex; align-items: center; gap: 6px; font-size: 16px; font-weight: 600; color: #fff; letter-spacing: .5px; text-decoration: none; }
+.nav-logo svg { color: #10b981; }
+.nav-logo span { color: #10b981; }
+.nav-links { display: flex; gap: 20px; }
+.nav-links a { color: #94a3b8; text-decoration: none; font-size: 14px; }
+.nav-links a.active { color: #fff; font-weight: 500; }
+.nav-user { font-size: 13px; color: #94a3b8; }
+
+.workspace { display: flex; flex: 1; overflow: hidden; }
+
+.panel {
+  width: 380px;
+  flex-shrink: 0;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 20px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  animation: fadeUp 0.5s ease-out forwards;
+}
+
+.section-title {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+.input-wrap { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.input-wrap input {
+  width: 160px;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: 'IBM Plex Mono', monospace;
+  color: var(--text);
+  background: #fff;
+}
+.input-wrap input:focus { outline: none; border-color: var(--blue); }
+.input-wrap .input-unit { font-size: 14px; color: var(--muted); flex: 1; }
+
+select {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 13px;
+  font-family: 'IBM Plex Sans Thai', sans-serif;
+  background: #f8fafc;
+  color: var(--text);
+  cursor: pointer;
+}
+select:focus { outline: none; border-color: var(--blue); }
+
+.btn {
+  width: 100%;
+  padding: 12px;
+  background: var(--navy);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: 'IBM Plex Sans Thai', sans-serif;
+  cursor: pointer;
+  transition: all .2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.btn:hover { background: var(--navy2); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(30, 42, 58, 0.2); }
+.btn:disabled { opacity: .5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+.btn-secondary {
+  background: #f1f5f9;
+  color: var(--navy);
+  border: 1px solid var(--border);
+}
+.btn-secondary:hover { background: #e2e8f0; }
+
+.main { flex: 1; display: flex; flex-direction: column; overflow-y: auto; overflow-x: hidden; position: relative; background: #e2e8f0; }
+
+.canvas-container {
+  min-height: 60vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  flex-shrink: 0;
+  position: relative;
+  opacity: 0;
+  animation: fadeUp 0.5s ease-out 0.2s forwards;
+}
+
+canvas {
+  background: #fff;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.legend {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: rgba(255,255,255,0.9);
+  padding: 10px 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  font-size: 12px;
+  display: flex;
+  gap: 15px;
+  z-index: 10;
+}
+.legend-item { display: flex; align-items: center; gap: 6px; }
+.legend-color { width: 14px; height: 14px; border-radius: 3px; }
+.color-full { background: #8ab099; border: 1px solid #5e8b75; }
+.color-cut { background: #e6b885; border: 1px solid #b88142; }
+.color-sliver { background: #e08a73; border: 1px solid #bd5a44; }
+
+.summary-panel {
+  background: #fdfdfc;
+  border-top: 1px solid var(--border);
+  padding: 24px;
+  display: flex;
+  gap: 16px;
+  flex-shrink: 0;
+  overflow-x: auto;
+  opacity: 0;
+  animation: fadeUp 0.5s ease-out 0.3s forwards;
+}
+
+.stat-box { 
+  background: #f6f7f2;
+  padding: 16px 20px;
+  border-radius: 12px;
+  display: flex; 
+  flex-direction: column; 
+  gap: 4px; 
+  flex: 1;
+  min-width: 180px;
+}
+.stat-title { font-size: 12px; color: var(--muted); font-weight: 500; }
+.stat-value { font-size: 26px; font-weight: 500; color: var(--text); }
+.stat-sub { font-size: 12px; color: var(--muted); }
+
+.obstacles-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 10px;
+}
+.obstacle-item {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.obstacle-item span {
+  font-size: 13px;
+  color: var(--text);
+}
+.obstacle-item input {
+  width: 48px;
+  padding: 6px 4px;
+  font-size: 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  text-align: center;
+  font-family: 'IBM Plex Mono', monospace;
+}
+.obstacle-remove {
+  cursor: pointer;
+  color: #ef4444;
+  font-weight: bold;
+  padding: 4px;
+}
+
+@media (max-width: 768px) {
+  .workspace { flex-direction: column; overflow-y: auto; }
+  .panel { width: 100%; border-right: none; border-bottom: 1px solid var(--border); overflow-y: visible; }
+  .main { overflow: visible; display: block; }
+  .canvas-container { height: 350px; flex: none; }
+  .summary-panel { flex-direction: column; gap: 15px; }
+  nav { flex-direction: column; height: auto; gap: 10px; padding: 15px; }
+  .nav-links { flex-wrap: wrap; justify-content: center; }
+}
+
+@media print {
+  nav, .panel { display: none !important; }
+  body, .workspace, .main { height: auto; overflow: visible !important; display: block; }
+  .canvas-container { padding: 0; background: #fff; page-break-inside: avoid; }
+  .summary-panel { padding: 10px 0; gap: 10px; border-top: none; flex-wrap: wrap; }
+  .cut-list-container { page-break-before: auto; padding: 10px 0; }
+  .stat-box { border: 1px solid #e2e8f0; min-width: 150px; }
+  .legend { position: static; box-shadow: none; border: 1px solid #e2e8f0; display: inline-flex; margin-bottom: 10px; }
+}
+</style>
+</head>
+
+<body>
+
+<nav>
+  <div style="display: flex; align-items: center; gap: 30px;">
+    <a class="nav-logo" href="home.html">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 22 12 12"/></svg>
+      ECO<span>Tile</span>
+    </a>
+    <div class="nav-links">
+      <a href="optimization.html" class="active">2D Optimization</a>
+      <a href="generator.html">3D Generator</a>
+    </div>
+  </div>
+  <div style="display: flex; align-items: center; gap: 15px;">
+    <button class="btn btn-secondary" onclick="window.print()" style="padding: 6px 12px; font-size: 12px; display: flex; gap: 6px; align-items: center; width: auto; border-radius: 6px;">
+      <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+      พิมพ์รายงาน (PDF)
+    </button>
+    <div class="nav-user" id="navUser"></div>
+  </div>
+</nav>
+
+<div class="workspace">
+  <div class="panel">
+    <div>
+      <div class="section-title">ข้อมูลห้องและสิ่งกีดขวาง</div>
+      <div class="input-wrap">
+        <input type="number" id="roomW" value="300" min="10">
+        <span class="input-unit">กว้าง (cm)</span>
+      </div>
+      <div class="input-wrap">
+        <input type="number" id="roomL" value="400" min="10">
+        <span class="input-unit">ยาว (cm)</span>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-title">ขนาดกระเบื้องและร่องยาแนว</div>
+      <div style="display: flex; gap: 8px;">
+        <select id="tileSize" style="flex: 2;">
+          <option value="30x30">30 × 30 cm</option>
+          <option value="60x60" selected>60 × 60 cm</option>
+          <option value="60x120">60 × 120 cm</option>
+          <option value="80x80">80 × 80 cm</option>
+        </select>
+        <div class="input-wrap" style="flex: 1; margin-bottom: 0;">
+          <input type="number" id="grout" value="0.2" step="0.1" min="0" style="width: 100%;">
+        </div>
+      </div>
+      <div style="font-size: 11px; color: var(--muted); margin-top: 4px;">ร่องยาแนว (cm) - ค่ามาตรฐาน 0.2</div>
+    </div>
+
+    <div>
+      <div class="section-title">ประเภทวัสดุ (ประเมินราคาวัสดุ)</div>
+      <select id="material">
+        <option value="ceramic" selected>เซรามิก</option>
+        <option value="granito">แกรนิตโต้</option>
+        <option value="marble">หินอ่อน</option>
+        <option value="wood">ลายไม้</option>
+      </select>
+    </div>
+
+    <div>
+      <div class="section-title">จุดเริ่มต้นการวาง (Placement Origin)</div>
+      <select id="origin">
+        <option value="center" selected>กึ่งกลางห้อง (แนะนำ)</option>
+        <option value="bottom-left">มุมซ้ายล่าง</option>
+      </select>
+    </div>
+
+    <div>
+      <div class="section-title">สิ่งกีดขวาง (เสา / ประตู) - Optional</div>
+      <div class="obstacles-list" id="obstaclesList">
+        <!-- Obstacles inputs will go here -->
+      </div>
+      <button class="btn btn-secondary" id="addObstacleBtn" style="margin-top: 8px; padding: 6px; font-size: 12px;">+ เพิ่มสิ่งกีดขวาง</button>
+    </div>
+
+    <hr style="border: none; border-top: 1px solid var(--border);">
+
+    <div id="errorMsg" style="color:red; font-size:12px; margin-top:5px; display:none;"></div>
+    <div style="font-size: 12px; color: var(--muted); text-align: center;">💡 ระบบจะคำนวณอัตโนมัติเมื่อมีการเปลี่ยนแปลง<br>และสามารถ <b>คลิกและลาก</b> สิ่งกีดขวางบนแผนผังได้เลย</div>
+  </div>
+
+  <div class="main">
+    <div class="legend">
+      <div class="legend-item"><div class="legend-color color-full"></div> เต็มแผ่น</div>
+      <div class="legend-item"><div class="legend-color color-cut"></div> ต้องตัดออกเล็กน้อย (เผื่อช่องยาแนว)</div>
+      <div class="legend-item"><div class="legend-color color-sliver"></div> ตัดยาก/เสี่ยงแตก (&lt; 5cm)</div>
+    </div>
+    
+    <div class="canvas-container" id="canvasContainer">
+      <canvas id="layoutCanvas"></canvas>
+    </div>
+
+    <div class="summary-panel">
+      <div class="stat-box">
+        <div class="stat-title">กระเบื้องที่ต้องซื้อ</div>
+        <div class="stat-value"><span id="sTotal">0</span> <span style="font-size:16px; font-weight:400;">แผ่น</span></div>
+        <div class="stat-sub"><span id="sFull">0</span> เต็ม + <span id="sCut">0</span> ตัด</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-title">ของเสีย (Greedy)</div>
+        <div class="stat-value"><span id="sWaste">0.0</span>%</div>
+        <div class="stat-sub">
+          <span style="color:var(--success); background:#ecfdf5; padding:2px 6px; border-radius:4px; font-size:11px;">vs <span id="sNoPlanWaste">0.0</span>% ถ้าไม่วางแผน</span>
+        </div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-title">ประหยัดได้เทียบแบบไม่วางแผน</div>
+        <div class="stat-value"><span id="sSavings">0</span> <span style="font-size:16px; font-weight:400;">แผ่น</span></div>
+        <div class="stat-sub">฿<span id="sSavingsCost">0</span> จากไม่ต้องซื้อ</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-title">ประมาณการค่าวัสดุ</div>
+        <div class="stat-value">฿<span id="sCost">0</span></div>
+        <div class="stat-sub"><span id="sCostFormula">0 แผ่น × 0/แผ่น</span></div>
+      </div>
+    </div>
+
+    <!-- Cut List Section -->
+    <div class="cut-list-container" style="padding: 20px 24px; background: #fff; border-top: 1px solid var(--border); overflow-y: auto; flex-shrink: 1; min-height: 150px;">
+      <h3 style="font-size: 14px; color: var(--navy); margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+        <span style="display:inline-block; width:12px; height:12px; background:#e6b885; border:1px solid #b88142; border-radius: 2px;"></span>
+        รายการชิ้นส่วนที่ต้องตัด (Cut List)
+      </h3>
+      <div id="cutListGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px;">
+        <!-- Cut items will be injected here -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="optimization.js"></script>
+
+<script>
+  const user = JSON.parse(localStorage.getItem("user"));
+  if (user) document.getElementById("navUser").textContent = user.email;
+</script>
+
+</body>
+</html>
