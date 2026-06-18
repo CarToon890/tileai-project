@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TileAI — เข้าสู่ระบบ</title>
+<title>ECOTile — เข้าสู่ระบบ</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -80,7 +80,7 @@ body {
   font-weight: 500;
   letter-spacing: 3px;
   text-transform: uppercase;
-  color: var(--blue2);
+  color: #10b981;
   margin-bottom: 24px;
   display: flex;
   align-items: center;
@@ -92,7 +92,7 @@ body {
   display: inline-block;
   width: 24px;
   height: 1px;
-  background: var(--blue2);
+  background: #10b981;
 }
 
 .brand h1 {
@@ -104,7 +104,7 @@ body {
 }
 
 .brand h1 span {
-  color: var(--blue2);
+  color: #10b981;
 }
 
 .brand p {
@@ -326,31 +326,34 @@ body {
 <!-- LEFT SIDE -->
 <div class="left">
   <div class="brand">
-    <div class="brand-mark">TileAI Platform</div>
-    <h1>ออกแบบ<br><span>กระเบื้อง</span><br>ด้วย AI</h1>
-    <p>สร้างลวดลายกระเบื้องที่ไม่ซ้ำใคร พร้อมประมาณการค่าใช้จ่ายจริงสำหรับตลาดไทย</p>
+    <div class="brand-mark">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 22 12 12"/></svg>
+      ECOTile Platform
+    </div>
+    <h1>คำนวณแผนผัง<br><span>ลดเศษกระเบื้อง</span><br>เพื่อสิ่งแวดล้อม</h1>
+    <p>คำนวณการปูกระเบื้อง 2D ช่วยลดขยะ (Waste) ประหยัดต้นทุน และช่วยรักษ์โลก</p>
   </div>
 
   <div class="features">
     <div class="feature">
-      <div class="feature-icon">✦</div>
+      <div class="feature-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 14H3"/><path d="M21 10H3"/><path d="M10 18V6"/><path d="M14 18V6"/><rect width="18" height="18" x="3" y="3" rx="2"/></svg></div>
       <div class="feature-text">
-        <strong>AI Generate</strong>
-        สร้างลวดลายกระเบื้องจาก prompt ในไม่กี่วินาที
+        <strong>2D Optimization</strong>
+        จัดวางแผนผังปูกระเบื้องแบบอัจฉริยะ
       </div>
     </div>
     <div class="feature">
-      <div class="feature-icon">🧱</div>
+      <div class="feature-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 22 12 12"/></svg></div>
       <div class="feature-text">
-        <strong>3D Preview</strong>
-        ดูผลลัพธ์จริงใน 3D Room ก่อนตัดสินใจ
+        <strong>Waste Reduction (ECO)</strong>
+        ลดเศษวัสดุเหลือทิ้งจากการตัดให้เหลือน้อยที่สุด
       </div>
     </div>
     <div class="feature">
-      <div class="feature-icon">🧾</div>
+      <div class="feature-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg></div>
       <div class="feature-text">
-        <strong>ประมาณการราคา</strong>
-        คำนวณค่าวัสดุ + ค่าแรง อิงราคาตลาดไทย ปี 2568
+        <strong>ประหยัดต้นทุน</strong>
+        คำนวณค่าวัสดุและค่าแรงได้แม่นยำ พร้อม Export PDF
       </div>
     </div>
   </div>
@@ -362,7 +365,7 @@ body {
 <div class="right">
   <div class="card">
     <div class="card-title">ยินดีต้อนรับกลับ</div>
-    <div class="card-sub">เข้าสู่ระบบเพื่อเริ่มออกแบบ</div>
+    <div class="card-sub">เข้าสู่ระบบเพื่อเริ่มคำนวณแผนผัง (ECO)</div>
 
     <form id="loginForm" autocomplete="off">
       <div class="field">

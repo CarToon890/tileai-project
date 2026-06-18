@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TileAI</title>
+<title>ECOTile</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -17,16 +17,22 @@ body {
   flex-direction: column;
 }
 
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 nav {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 20px 40px;
   border-bottom: 1px solid rgba(255,255,255,.06);
+  animation: fadeInUp 0.4s ease-out;
 }
 
-.logo { font-size: 16px; font-weight: 600; }
-.logo span { color: #60a5fa; }
+.logo { display: flex; align-items: center; gap: 8px; font-size: 16px; font-weight: 600; }
+.logo span { color: #10b981; }
 
 .nav-right {
   display: flex;
@@ -61,7 +67,7 @@ main {
   gap: 48px;
 }
 
-.headline { text-align: center; }
+.headline { text-align: center; animation: fadeInUp 0.6s ease-out forwards; }
 
 .headline h1 {
   font-size: 32px;
@@ -78,40 +84,63 @@ main {
 
 .cards {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 16px;
   max-width: 720px;
   width: 100%;
 }
 
 .card {
-  background: rgba(255,255,255,.03);
-  border: 1px solid rgba(255,255,255,.07);
-  border-radius: 14px;
-  padding: 28px 24px;
-  transition: border-color .2s;
+  padding: 16px;
+  opacity: 0;
+  animation: fadeInUp 0.6s ease-out forwards;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
 }
 
-.card:hover { border-color: rgba(96,165,250,.25); }
+.cards .card:nth-child(1) { animation-delay: 0.1s; }
+.cards .card:nth-child(2) { animation-delay: 0.2s; }
+.cards .card:nth-child(3) { animation-delay: 0.3s; }
+.cards .card:nth-child(4) { animation-delay: 0.4s; }
 
-.card-icon { font-size: 22px; margin-bottom: 14px; }
+.card-icon {
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.1);
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  flex-shrink: 0;
+}
+
+.card-content {
+  display: flex;
+  flex-direction: column;
+}
 
 .card-title {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
-  color: #cbd5e1;
-  margin-bottom: 8px;
+  color: #e2e8f0;
+  margin-bottom: 6px;
 }
 
 .card-desc {
   font-size: 13px;
-  color: #475569;
-  line-height: 1.6;
+  color: #94a3b8;
+  line-height: 1.5;
+}
+
+.cta-group {
+  display: flex; gap: 16px; opacity: 0; animation: fadeInUp 0.6s ease-out 0.5s forwards;
 }
 
 .cta-btn {
   padding: 14px 36px;
-  background: #3b82f6;
+  background: #10b981;
   color: #fff;
   border: none;
   border-radius: 10px;
@@ -119,9 +148,16 @@ main {
   font-weight: 600;
   font-family: inherit;
   cursor: pointer;
-  transition: background .15s;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
-.cta-btn:hover { background: #2563eb; }
+.cta-btn:hover { 
+  background: #059669;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
 
 @media (max-width: 600px) {
   nav { padding: 16px 20px; }
@@ -134,7 +170,10 @@ main {
 <body>
 
 <nav>
-  <div class="logo">✦ Tile<span>AI</span></div>
+  <div class="logo">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 22 12 12"/></svg>
+    ECO<span>Tile</span>
+  </div>
   <div class="nav-right">
     <span class="user-email" id="navEmail"></span>
     <button class="logout-btn" onclick="logout()">ออกจากระบบ</button>
@@ -143,31 +182,49 @@ main {
 
 <main>
   <div class="headline">
-    <h1>ออกแบบกระเบื้องด้วย AI</h1>
-    <p>พิมพ์ลวดลาย เลือกวัสดุ รับใบเสนอราคาได้เลย</p>
+    <h1>ECOTile คำนวณแผนผังปูกระเบื้อง</h1>
+    <p>ลดเศษวัสดุเหลือทิ้ง ประหยัดต้นทุน เป็นมิตรต่อสิ่งแวดล้อม</p>
   </div>
 
   <div class="cards">
     <div class="card">
-      <div class="card-icon">✦</div>
-      <div class="card-title">AI Generate</div>
-      <div class="card-desc">สร้างลวดลายกระเบื้องจาก prompt ภาษาไทยหรืออังกฤษ</div>
+      <div class="card-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 14H3"/><path d="M21 10H3"/><path d="M10 18V6"/><path d="M14 18V6"/><rect width="18" height="18" x="3" y="3" rx="2"/></svg></div>
+      <div class="card-content">
+        <div class="card-title">2D Optimization</div>
+        <div class="card-desc">คำนวณแผนผังการปูกระเบื้อง 2D ช่วยลดเศษวัสดุเหลือทิ้งอย่างมีประสิทธิภาพ</div>
+      </div>
     </div>
     <div class="card">
-      <div class="card-icon">⬜</div>
-      <div class="card-title">3D Preview</div>
-      <div class="card-desc">จำลองกระเบื้องบนผนังหรือพื้นในโมเดล 3D แบบ real-time</div>
+      <div class="card-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg></div>
+      <div class="card-content">
+        <div class="card-title">ใบเสนอราคา</div>
+        <div class="card-desc">คำนวณค่าวัสดุ + ค่าแรง พร้อมเปรียบเทียบความประหยัด และ export เป็น PDF ได้</div>
+      </div>
     </div>
     <div class="card">
-      <div class="card-icon">฿</div>
-      <div class="card-title">ใบเสนอราคา</div>
-      <div class="card-desc">คำนวณค่าวัสดุ + ค่าแรง พร้อม export PDF</div>
+      <div class="card-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg></div>
+      <div class="card-content">
+        <div class="card-title">3D Preview</div>
+        <div class="card-desc">จำลองกระเบื้องบนผนังหรือพื้นในโมเดล 3D เสมือนจริง</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg></div>
+      <div class="card-content">
+        <div class="card-title">AI Generate</div>
+        <div class="card-desc">ฟีเจอร์เสริมสำหรับสร้างลวดลายกระเบื้องใหม่ๆ จาก prompt ภาษาไทยหรืออังกฤษ</div>
+      </div>
     </div>
   </div>
 
-  <button class="cta-btn" onclick="window.location.href='generator.html'">
-    เริ่มออกแบบเลย →
-  </button>
+  <div class="cta-group">
+    <button class="cta-btn" onclick="window.location.href='optimization.html'">
+      เริ่มคำนวณแผนผังลดเศษกระเบื้อง <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+    </button>
+    <button class="cta-btn" style="background: rgba(255,255,255,.1);" onclick="window.location.href='generator.html'">
+      ออกแบบด้วย AI<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+    </button>
+  </div>
 </main>
 
 <script>
