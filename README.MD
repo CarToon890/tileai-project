@@ -1,4 +1,4 @@
-# ✦ TileAI
+# ECOTile
 
 ระบบออกแบบและประมาณราคากระเบื้องด้วย AI สำหรับตลาดไทย  
 Demo: [tileai-project.vercel.app](https://tileai-project.vercel.app)
@@ -7,14 +7,14 @@ Demo: [tileai-project.vercel.app](https://tileai-project.vercel.app)
 
 ## User Flow
 
-```
+```text
 login.html → home.html → generator.html → receipt.html
 ```
 
 1. **Login / Register** — สมัครสมาชิก หรือเข้าสู่ระบบ
-2. **Home** — หน้าหลัก แสดง feature overview
+2. **Home** — หน้าหลัก แสดง feature overview ของ ECOTile
 3. **Generator** — พิมพ์ลวดลาย เลือกตัวเลือก → Generate หรือ Upload รูปกระเบื้อง → ดู 3D Preview + ราคาประมาณการ
-4. **Receipt** — ใบเสร็จราคาสำหรับพิมพ์
+4. **Receipt** — ใบเสร็จราคาสำหรับพิมพ์เพื่อนำไปใช้งานต่อ
 
 ---
 
@@ -33,7 +33,7 @@ login.html → home.html → generator.html → receipt.html
 
 ## Project Structure
 
-```
+```text
 tileai-project/
 ├── server.js           # Express backend (Vercel serverless)
 ├── vercel.json         # Vercel config
@@ -80,7 +80,7 @@ node server.js
 
 ### 1. ตั้ง Environment Variables บน Vercel Dashboard
 
-```
+```text
 DATABASE_URL        → Project Settings → Environment Variables
 OPENAI_API_KEY      → Project Settings → Environment Variables
 ```
@@ -137,7 +137,7 @@ OPENAI_API_KEY      → Project Settings → Environment Variables
 | หินอ่อน   | 900 ฿ | 1,200 ฿ | 1,500 ฿ | 1,300 ฿ | 1,050 ฿/ตร.ม. |
 | ลายไม้    | 400 ฿ | 500 ฿   | 600 ฿   | 550 ฿   | 450 ฿/ตร.ม.   |
 
-ราคาต่อ ตร.ม. — อ้างอิงตลาดไทย ไม่ได้ดึงจาก API ภายนอก
+> ราคาต่อ ตร.ม. — อ้างอิงตลาดไทย ไม่ได้ดึงจาก API ภายนอก
 
 ---
 
