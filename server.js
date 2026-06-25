@@ -229,6 +229,10 @@ app.post("/api/optimize-layout", (req, res) => {
       return res.status(400).send("Missing required dimensions");
     }
 
+    if (roomW > 5000 || roomL > 5000) {
+      return res.status(400).send("ขนาดห้องใหญ่เกินไป (สูงสุด 50x50 เมตร)");
+    }
+
     const tW = tileW + grout;
     const tL = tileL + grout;
     
@@ -295,7 +299,7 @@ app.post("/api/optimize-layout", (req, res) => {
           if (p.x < ix1) newPieces.push({x: p.x, y: iy1, w: ix1 - p.x, h: iy2 - iy1});
           if (pR > ix2)  newPieces.push({x: ix2, y: iy1, w: pR - ix2, h: iy2 - iy1});
         }
-        pieces = newPieces.filter(p => p.w > 0 && p.h > 0);
+        pieces = newPieces.filter(p => p.w >= 0.01 && p.h >= 0.01);
       }
       return pieces;
     }

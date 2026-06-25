@@ -92,6 +92,27 @@ button:hover {
   box-shadow: 0 10px 25px rgba(76, 105, 255, 0.4);
 }
 
+button:active {
+  transform: translateY(0) scale(0.98);
+  box-shadow: 0 4px 10px rgba(76, 105, 255, 0.4);
+}
+
+/* ========== SPINNER ========== */
+.spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: #fff;
+  animation: spin 0.8s ease-in-out infinite;
+  vertical-align: middle;
+  margin-right: 6px;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
 /* ========== GALLERY ========== */
 
 .gallery {

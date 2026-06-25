@@ -837,7 +837,7 @@ async function generateTile() {
 
   errEl.style.display = "none";
   btn.disabled    = true;
-  btn.textContent = "⏳ กำลังสร้าง...";
+  btn.innerHTML = `<div class="spinner"></div> กำลังสร้าง...`;
 
   try {
     const res = await fetch("/generate-tile", {
