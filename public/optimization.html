@@ -131,7 +131,86 @@ select:focus { outline: none; border-color: var(--blue); }
 }
 .btn-secondary:hover { background: #e2e8f0; }
 
-.main { flex: 1; display: flex; flex-direction: column; overflow-y: auto; overflow-x: hidden; position: relative; background: #e2e8f0; }
+.info-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background-color: var(--muted);
+  color: white;
+  font-size: 11px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-left: 6px;
+  font-family: sans-serif;
+  vertical-align: middle;
+  transition: background-color 0.2s;
+}
+.info-icon:hover {
+  background-color: var(--primary);
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s, visibility 0.3s;
+}
+.modal-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+.modal-box {
+  background: white;
+  width: 90%;
+  max-width: 400px;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  transform: translateY(20px);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.modal-overlay.active .modal-box {
+  transform: translateY(0);
+}
+.modal-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--navy);
+  margin-bottom: 12px;
+}
+.modal-desc {
+  font-size: 14px;
+  color: var(--text);
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+.modal-close {
+  width: 100%;
+  background: var(--navy);
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+  font-family: 'IBM Plex Sans Thai', sans-serif;
+}
+.modal-close:hover {
+  background: var(--navy2);
+}
+.main { flex: 1; display: flex; flex-direction: column; overflow-y: auto; overflow-x: auto; position: relative; background: #e2e8f0; }
 
 .canvas-container {
   min-height: 60vh;
@@ -240,10 +319,29 @@ canvas {
   nav, .panel { display: none !important; }
   body, .workspace, .main { height: auto; overflow: visible !important; display: block; }
   .canvas-container { padding: 0; background: #fff; page-break-inside: avoid; }
-  .summary-panel { padding: 10px 0; gap: 10px; border-top: none; flex-wrap: wrap; }
-  .cut-list-container { page-break-before: auto; padding: 10px 0; }
-  .stat-box { border: 1px solid #e2e8f0; min-width: 150px; }
+  .summary-panel { padding: 10px 0; gap: 10px; border-top: none; flex-wrap: wrap; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+  .cut-list-container { page-break-before: auto; padding: 10px 0; page-break-inside: avoid; }
+  .stat-box { border: 1px solid #e2e8f0; min-width: 150px; page-break-inside: avoid; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
   .legend { position: static; box-shadow: none; border: 1px solid #e2e8f0; display: inline-flex; margin-bottom: 10px; }
+  #printHeader { display: block !important; }
+  .info-icon, .modal-overlay { display: none !important; }
+  button { display: none !important; }
+}
+#printHeader {
+  display: none;
+  text-align: center;
+  padding: 20px 0;
+  border-bottom: 2px solid var(--border);
+  margin-bottom: 20px;
+}
+#printHeader h2 {
+  font-size: 24px;
+  color: var(--navy);
+  margin-bottom: 8px;
+}
+#printHeader p {
+  font-size: 14px;
+  color: var(--text);
 }
 </style>
 </head>
@@ -285,19 +383,21 @@ canvas {
     </div>
 
     <div>
-      <div class="section-title">ขนาดกระเบื้องและร่องยาแนว</div>
-      <div style="display: flex; gap: 8px;">
-        <select id="tileSize" style="flex: 2;">
-          <option value="30x30">30 × 30 cm</option>
-          <option value="60x60" selected>60 × 60 cm</option>
-          <option value="60x120">60 × 120 cm</option>
-          <option value="80x80">80 × 80 cm</option>
-        </select>
-        <div class="input-wrap" style="flex: 1; margin-bottom: 0;">
-          <input type="number" id="grout" value="0.2" step="0.1" min="0" style="width: 100%;">
-        </div>
+      <div class="section-title">ขนาดกระเบื้อง</div>
+      <select id="tileSize">
+        <option value="30x30">30 × 30 cm</option>
+        <option value="60x60" selected>60 × 60 cm</option>
+        <option value="60x120">60 × 120 cm</option>
+        <option value="80x80">80 × 80 cm</option>
+      </select>
+    </div>
+
+    <div>
+      <div class="section-title">ระยะร่องยาแนว</div>
+      <div class="input-wrap">
+        <input type="number" id="grout" value="0.2" step="0.1" min="0">
+        <span class="input-unit">cm (ค่ามาตรฐาน 0.2)</span>
       </div>
-      <div style="font-size: 11px; color: var(--muted); margin-top: 4px;">ร่องยาแนว (cm) - ค่ามาตรฐาน 0.2</div>
     </div>
 
     <div>
@@ -314,7 +414,10 @@ canvas {
       <div class="section-title">จุดเริ่มต้นการวาง (Placement Origin)</div>
       <select id="origin">
         <option value="center" selected>กึ่งกลางห้อง (แนะนำ)</option>
-        <option value="bottom-left">มุมซ้ายล่าง</option>
+        <option value="top-left">มุมซ้ายบน (Top-Left)</option>
+        <option value="top-right">มุมขวาบน (Top-Right)</option>
+        <option value="bottom-left">มุมซ้ายล่าง (Bottom-Left)</option>
+        <option value="bottom-right">มุมขวาล่าง (Bottom-Right)</option>
       </select>
     </div>
 
@@ -329,10 +432,15 @@ canvas {
     <hr style="border: none; border-top: 1px solid var(--border);">
 
     <div id="errorMsg" style="color:red; font-size:12px; margin-top:5px; display:none;"></div>
-    <div style="font-size: 12px; color: var(--muted); text-align: center;">💡 ระบบจะคำนวณอัตโนมัติเมื่อมีการเปลี่ยนแปลง<br>และสามารถ <b>คลิกและลาก</b> สิ่งกีดขวางบนแผนผังได้เลย</div>
+    <div style="font-size: 12px; color: var(--muted); text-align: center;">ระบบจะคำนวณอัตโนมัติเมื่อมีการเปลี่ยนแปลง<br>และสามารถ <b>คลิกและลาก</b> สิ่งกีดขวางบนแผนผังได้เลย</div>
   </div>
 
   <div class="main">
+    <div id="printHeader">
+      <h2>รายงานแผนผังการปูกระเบื้อง (ECOTile 2D Optimization)</h2>
+      <p id="printDesc">ขนาดห้อง: - cm | ขนาดกระเบื้อง: - cm</p>
+    </div>
+
     <div class="legend">
       <div class="legend-item"><div class="legend-color color-full"></div> เต็มแผ่น</div>
       <div class="legend-item"><div class="legend-color color-cut"></div> ต้องตัดออกเล็กน้อย (เผื่อช่องยาแนว)</div>
@@ -345,24 +453,33 @@ canvas {
 
     <div class="summary-panel">
       <div class="stat-box">
-        <div class="stat-title">กระเบื้องที่ต้องซื้อ</div>
+        <div class="stat-title">
+          ใช้กระเบื้องจริง (ซื้อ) 
+          <span class="info-icon" onclick="showInfoModal('total')">i</span>
+        </div>
         <div class="stat-value"><span id="sTotal">0</span> <span style="font-size:16px; font-weight:400;">แผ่น</span></div>
-        <div class="stat-sub"><span id="sFull">0</span> เต็ม + <span id="sCut">0</span> ตัด</div>
+        <div class="stat-sub">ปูเต็ม <span id="sFull">0</span> แผ่น / ตัดแบ่ง <span id="sCut">0</span> ชิ้นย่อย</div>
       </div>
       <div class="stat-box">
-        <div class="stat-title">ของเสีย (Greedy)</div>
+        <div class="stat-title">
+          ขยะกระเบื้องเหลือทิ้ง (Waste) 
+          <span class="info-icon" onclick="showInfoModal('waste')">i</span>
+        </div>
         <div class="stat-value"><span id="sWaste">0.0</span>%</div>
         <div class="stat-sub">
-          <span style="color:var(--success); background:#ecfdf5; padding:2px 6px; border-radius:4px; font-size:11px;">vs <span id="sNoPlanWaste">0.0</span>% ถ้าไม่วางแผน</span>
+          <span style="color:var(--success); background:#ecfdf5; padding:2px 6px; border-radius:4px; font-size:11px;">จากเดิม <span id="sNoPlanWaste">0.0</span>% หากให้ช่างกะระยะเอง</span>
         </div>
       </div>
       <div class="stat-box">
-        <div class="stat-title">ประหยัดได้เทียบแบบไม่วางแผน</div>
+        <div class="stat-title">
+          หมุนเวียนเศษ (ECO Savings) 
+          <span class="info-icon" onclick="showInfoModal('savings')">i</span>
+        </div>
         <div class="stat-value"><span id="sSavings">0</span> <span style="font-size:16px; font-weight:400;">แผ่น</span></div>
-        <div class="stat-sub">฿<span id="sSavingsCost">0</span> จากไม่ต้องซื้อ</div>
+        <div class="stat-sub">ประหยัดค่าซื้อแผ่นใหม่ได้ ฿<span id="sSavingsCost">0</span></div>
       </div>
       <div class="stat-box">
-        <div class="stat-title">ประมาณการค่าวัสดุ</div>
+        <div class="stat-title">งบประมาณค่ากระเบื้อง</div>
         <div class="stat-value">฿<span id="sCost">0</span></div>
         <div class="stat-sub"><span id="sCostFormula">0 แผ่น × 0/แผ่น</span></div>
       </div>
@@ -381,8 +498,49 @@ canvas {
   </div>
 </div>
 
-<script src="optimization.js"></script>
+  <div class="modal-overlay" id="infoModal">
+    <div class="modal-box">
+      <div class="modal-title" id="modalTitle">Title</div>
+      <div class="modal-desc" id="modalDesc">Description goes here.</div>
+      <button class="modal-close" onclick="closeInfoModal()">เข้าใจแล้ว (Got it)</button>
+    </div>
+  </div>
 
+  <script src="optimization.js"></script>
+  <script>
+    const infoData = {
+      'total': {
+        title: 'ปริมาณกระเบื้องที่ต้องจัดซื้อ (Total Required Tiles)',
+        desc: 'จำนวนกระเบื้องแผ่นเต็มทั้งหมดที่ท่านจำเป็นต้องสั่งซื้อจริง โดยระบบได้ทำการคำนวณหักลบเศษกระเบื้องที่สามารถนำกลับมาหมุนเวียนใช้ใหม่ได้ออกแล้ว (ตัวเลขนี้ครอบคลุมทั้งกระเบื้องที่ใช้ปูแบบเต็มแผ่น และกระเบื้องแผ่นใหม่ที่ถูกนำมาตัดแบ่ง)'
+      },
+      'waste': {
+        title: 'อัตราส่วนเศษกระเบื้องเหลือทิ้ง (Waste Percentage)',
+        desc: 'สัดส่วนเปอร์เซ็นต์ของเศษกระเบื้องที่มีขนาดเล็กเกินไปจนไม่สามารถนำมาประกอบใช้ต่อได้และต้องสูญเสียไป หากตัวเลขนี้มีค่าต่ำ จะแสดงถึงการใช้ทรัพยากรได้อย่างคุ้มค่าสูงสุดและเป็นมิตรต่อสิ่งแวดล้อม (ECO-Friendly)'
+      },
+      'savings': {
+        title: 'ประสิทธิภาพการหมุนเวียนเศษ (ECO Savings)',
+        desc: 'จำนวนกระเบื้องแผ่นใหม่ที่ท่าน "ไม่ต้องซื้อเพิ่ม" เกิดจากระบบอัลกอริทึม ECOTile ที่คำนวณนำเศษกระเบื้องจากการตัดในพื้นที่หนึ่ง ไปหมุนเวียนจัดวางในพื้นที่อื่นของห้องอย่างชาญฉลาด ช่วยลดต้นทุนวัสดุและลดปริมาณขยะได้อย่างเป็นรูปธรรม'
+      }
+    };
+
+    function showInfoModal(type) {
+      const modal = document.getElementById('infoModal');
+      document.getElementById('modalTitle').textContent = infoData[type].title;
+      document.getElementById('modalDesc').textContent = infoData[type].desc;
+      modal.classList.add('active');
+    }
+
+    function closeInfoModal() {
+      document.getElementById('infoModal').classList.remove('active');
+    }
+
+    // Close modal if clicked outside the box
+    document.getElementById('infoModal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        closeInfoModal();
+      }
+    });
+  </script>
 <script>
   const user = JSON.parse(localStorage.getItem("user"));
   if (user) document.getElementById("navUser").textContent = user.email;

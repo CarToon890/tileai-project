@@ -13,6 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let dragTargetIndex = -1;
   let dragOffsetX = 0;
   let dragOffsetY = 0;
+  let currentCanvasPadding = 40;
 
   // Auto-calculate on input change
   const inputs = ["roomW", "roomL", "tileSize", "origin", "material", "grout"];
@@ -75,8 +76,8 @@ document.addEventListener("DOMContentLoaded", () => {
   // Canvas Drag & Drop
   canvas.addEventListener("mousedown", (e) => {
     const rect = canvas.getBoundingClientRect();
-    const mouseX = (e.clientX - rect.left - 40) / currentScale;
-    const mouseY = (e.clientY - rect.top - 40) / currentScale;
+    const mouseX = (e.clientX - rect.left - currentCanvasPadding) / currentScale;
+    const mouseY = (e.clientY - rect.top - currentCanvasPadding) / currentScale;
 
     // Check if clicked inside any obstacle (iterate backwards to click top-most)
     for (let i = obstacles.length - 1; i >= 0; i--) {
@@ -95,8 +96,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   canvas.addEventListener("mousemove", (e) => {
     const rect = canvas.getBoundingClientRect();
-    const mouseX = (e.clientX - rect.left - 40) / currentScale;
-    const mouseY = (e.clientY - rect.top - 40) / currentScale;
+    const mouseX = (e.clientX - rect.left - currentCanvasPadding) / currentScale;
+    const mouseY = (e.clientY - rect.top - currentCanvasPadding) / currentScale;
 
     if (isDragging && dragTargetIndex !== -1) {
       let newX = mouseX - dragOffsetX;
@@ -170,6 +171,19 @@ document.addEventListener("DOMContentLoaded", () => {
     const tileW = parseFloat(parts[0]);
     const tileL = parseFloat(parts[1]);
 
+    // Clamp obstacles to ensure they don't fall outside the new room bounds
+    let obsChanged = false;
+    obstacles.forEach(obs => {
+      const oldX = obs.x, oldY = obs.y;
+      obs.x = Math.max(0, Math.min(obs.x, roomW - obs.w));
+      obs.y = Math.max(0, Math.min(obs.y, roomL - obs.h));
+      if (oldX !== obs.x || oldY !== obs.y) obsChanged = true;
+    });
+    
+    if (obsChanged) {
+      renderObstacleList(); // Update inputs in sidebar if they changed
+    }
+
     try {
       const res = await fetch("/api/optimize-layout", {
         method: "POST",
@@ -189,6 +203,11 @@ document.addEventListener("DOMContentLoaded", () => {
       document.getElementById("sFull").textContent = data.summary.fullTiles;
       document.getElementById("sCut").textContent = data.summary.cutTiles;
       document.getElementById("sWaste").textContent = data.summary.wastePercent;
+      
+      const printDesc = document.getElementById("printDesc");
+      if (printDesc) {
+        printDesc.textContent = `ขนาดห้อง: ${roomW}x${roomL} cm | ขนาดกระเบื้อง: ${tileW}x${tileL} cm | ร่องยาแนว: ${grout} cm`;
+      }
 
       // Cost Calculation
       const matPrices = {
@@ -207,8 +226,8 @@ document.addEventListener("DOMContentLoaded", () => {
       const pricePerTile = Math.round(sqmPerTile * pricePerSqm);
       
       // Calculate No Plan Waste & Savings
-      // แบบไม่วางแผน (No Plan) = ตัดทิ้งไม่นำกลับมาใช้ใหม่ (กว้าง/ขนาด) * (ยาว/ขนาด)
-      const noPlanTiles = Math.ceil(roomW / tileW) * Math.ceil(roomL / tileL);
+      // แบบไม่วางแผน (No Plan) = ตัดทิ้งไม่นำกลับมาใช้ใหม่ (กว้าง/ขนาดบวกยาแนว) * (ยาว/ขนาดบวกยาแนว)
+      const noPlanTiles = Math.ceil(roomW / (tileW + grout)) * Math.ceil(roomL / (tileL + grout));
       const noPlanArea = noPlanTiles * tileW * tileL;
       // หาพื้นที่ห้องหักอุปสรรค
       let actualRoomArea = roomW * roomL;
@@ -281,23 +300,28 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function drawLayout(roomW, roomL, tileW, tileL, obsArray, layout) {
     const padding = 40;
-    const canvasPadding = 40; // Padding inside canvas for dimension labels
     const container = document.getElementById("canvasContainer");
     
-    // Calculate scale to fit inside container
-    const maxWidth = container.clientWidth - padding * 2 - canvasPadding * 2;
-    const maxHeight = container.clientHeight - padding * 2 - canvasPadding * 2;
+    // Temporarily shrink canvas to measure true container size without infinite growth feedback loop
+    canvas.style.display = 'none';
+    
+    // Calculate scale to fit inside container (assuming 40px base padding)
+    const maxWidth = container.clientWidth - padding * 2 - 40 * 2;
+    const maxHeight = container.clientHeight - padding * 2 - 40 * 2;
+    
+    canvas.style.display = 'block';
     
     const scaleX = maxWidth / roomW;
     const scaleY = maxHeight / roomL;
     
-    // Use Math.max to enforce a minimum scale of 1.0 (1cm = 1px)
-    // This ensures tiles don't shrink to microscopic sizes for large rooms.
-    // Instead, the canvas will expand and the container's scrollbar will appear.
     currentScale = Math.max(Math.min(scaleX, scaleY), 1.0);
     
-    const logicalWidth = (roomW * currentScale) + (canvasPadding * 2);
-    const logicalHeight = (roomL * currentScale) + (canvasPadding * 2);
+    // Calculate dynamic padding to prevent large tiles from being clipped
+    const maxOverhang = Math.max(tileW, tileL) * currentScale;
+    currentCanvasPadding = Math.max(40, maxOverhang * 0.8);
+    
+    const logicalWidth = (roomW * currentScale) + (currentCanvasPadding * 2);
+    const logicalHeight = (roomL * currentScale) + (currentCanvasPadding * 2);
     
     const dpr = window.devicePixelRatio || 1;
     
@@ -307,16 +331,11 @@ document.addEventListener("DOMContentLoaded", () => {
     canvas.style.width = logicalWidth + "px";
     canvas.style.height = logicalHeight + "px";
     
-    // Scale all drawing operations by the dpr
     ctx.scale(dpr, dpr);
-    
     ctx.clearRect(0, 0, logicalWidth, logicalHeight);
-
-    // Save context so we can restore it after translation
     ctx.save();
     
-    // Translate origin to leave space for labels on top and left
-    ctx.translate(canvasPadding, canvasPadding);
+    ctx.translate(currentCanvasPadding, currentCanvasPadding);
 
     // Draw Room Background
     ctx.fillStyle = "#f9f6f0";
@@ -324,6 +343,9 @@ document.addEventListener("DOMContentLoaded", () => {
     ctx.strokeStyle = "#d6d3cd";
     ctx.lineWidth = 2;
     ctx.strokeRect(0, 0, roomW * currentScale, roomL * currentScale);
+
+    // Array to hold text rendering commands to draw on top of obstacles
+    const labelsToDraw = [];
 
     // Draw Tiles
     let cutIndex = 1;
@@ -337,7 +359,7 @@ document.addEventListener("DOMContentLoaded", () => {
       ctx.rect(x, y, w, h);
       
       if (tile.type === "full") {
-        ctx.fillStyle = "rgba(138, 176, 153, 0.6)"; // #8ab099 (Natural green)
+        ctx.fillStyle = "rgba(138, 176, 153, 0.6)";
         ctx.fill();
         ctx.strokeStyle = "#5e8b75";
         ctx.lineWidth = 1;
@@ -346,18 +368,17 @@ document.addEventListener("DOMContentLoaded", () => {
         const isSliver = tile.w < 5 || tile.h < 5;
         
         if (isSliver) {
-          ctx.fillStyle = "rgba(224, 138, 115, 0.6)"; // #e08a73 (Muted terracotta)
+          ctx.fillStyle = "rgba(224, 138, 115, 0.6)";
           ctx.fill();
           ctx.strokeStyle = "#bd5a44";
         } else {
-          ctx.fillStyle = "rgba(230, 184, 133, 0.6)"; // #e6b885 (Sandy brown)
+          ctx.fillStyle = "rgba(230, 184, 133, 0.6)";
           ctx.fill();
           ctx.strokeStyle = "#b88142";
         }
         ctx.lineWidth = 1;
         ctx.stroke();
         
-        // Draw dashed outline of the original tile for cut pieces
         if (tile.originalX !== undefined && tile.originalY !== undefined) {
           const ox = tile.originalX * currentScale;
           const oy = tile.originalY * currentScale;
@@ -372,23 +393,11 @@ document.addEventListener("DOMContentLoaded", () => {
           ctx.restore();
         }
         
-        // Calculate font size proportional to the rendered tile dimensions
-        // Cap at 36px so it doesn't get ridiculously large, but enforce minimum 12px
-        // so it overflows (นอกกรอบ) and remains readable for very small cuts.
-        let fontSize = Math.max(12, Math.min(36, w * 0.4, h * 0.4));
+        // Center text on the CUT piece so they never overlap if an obstacle splits a tile
+        let cx = x + w / 2;
+        let cy = y + h / 2;
         
-        ctx.font = `bold ${fontSize}px 'IBM Plex Sans Thai', sans-serif`;
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        
-        // Add a white text stroke (halo) so it's readable when it overflows outside the box
-        ctx.lineWidth = 2.5;
-        ctx.strokeStyle = "rgba(255, 255, 255, 0.9)";
-        ctx.strokeText(cutIndex.toString(), x + w/2, y + h/2);
-        
-        ctx.fillStyle = "#78350f"; // Dark text
-        ctx.fillText(cutIndex.toString(), x + w/2, y + h/2);
-        
+        labelsToDraw.push({ text: cutIndex.toString(), cx, cy });
         cutIndex++;
       }
     });
@@ -408,7 +417,6 @@ document.addEventListener("DOMContentLoaded", () => {
       ctx.strokeRect(x, y, w, h);
       ctx.setLineDash([]);
       
-      // X pattern inside obstacle
       ctx.beginPath();
       ctx.moveTo(x, y);
       ctx.lineTo(x + w, y + h);
@@ -418,7 +426,20 @@ document.addEventListener("DOMContentLoaded", () => {
       ctx.stroke();
     });
 
-    // Restore context so we can draw labels outside the translated room bounds
+    // Draw Labels ON TOP of everything
+    const fontSize = Math.max(14, Math.min(48, 24 * currentScale));
+    ctx.font = `bold ${fontSize}px 'IBM Plex Sans Thai', sans-serif`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.lineWidth = 3;
+    
+    labelsToDraw.forEach(label => {
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.95)";
+      ctx.strokeText(label.text, label.cx, label.cy);
+      ctx.fillStyle = "#78350f";
+      ctx.fillText(label.text, label.cx, label.cy);
+    });
+
     ctx.restore();
     
     // Draw dimension labels
@@ -428,13 +449,13 @@ document.addEventListener("DOMContentLoaded", () => {
     ctx.textBaseline = "middle";
     
     // Top label (Width)
-    const centerX = canvasPadding + (roomW * currentScale) / 2;
-    ctx.fillText(`กว้าง: ${roomW} cm`, centerX, canvasPadding / 2);
+    const centerX = currentCanvasPadding + (roomW * currentScale) / 2;
+    ctx.fillText(`กว้าง: ${roomW} cm`, centerX, currentCanvasPadding / 2);
     
     // Left label (Length)
-    const centerY = canvasPadding + (roomL * currentScale) / 2;
+    const centerY = currentCanvasPadding + (roomL * currentScale) / 2;
     ctx.save();
-    ctx.translate(canvasPadding / 2, centerY);
+    ctx.translate(currentCanvasPadding / 2, centerY);
     ctx.rotate(-Math.PI / 2);
     ctx.fillText(`ยาว: ${roomL} cm`, 0, 0);
     ctx.restore();

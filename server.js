@@ -239,11 +239,22 @@ app.post("/api/optimize-layout", (req, res) => {
       // Place center of a tile at center of the room
       const centerX = roomW / 2;
       const centerY = roomL / 2;
-      // Find the furthest negative coordinate we need to start from
       const numLeft = Math.ceil((centerX + tileW/2) / tW);
       const numBottom = Math.ceil((centerY + tileL/2) / tL);
       startX = centerX - tileW/2 - (numLeft * tW);
       startY = centerY - tileL/2 - (numBottom * tL);
+    } else if (origin === "top-left") {
+      startX = 0;
+      startY = 0;
+    } else if (origin === "top-right") {
+      startX = roomW - Math.ceil(roomW / tW) * tW;
+      startY = 0;
+    } else if (origin === "bottom-left") {
+      startX = 0;
+      startY = roomL - Math.ceil(roomL / tL) * tL;
+    } else if (origin === "bottom-right") {
+      startX = roomW - Math.ceil(roomW / tW) * tW;
+      startY = roomL - Math.ceil(roomL / tL) * tL;
     }
     
     const layout = [];
